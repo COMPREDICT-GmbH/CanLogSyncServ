@@ -5,6 +5,7 @@ signal ID over a IPC protocol based on ZeroMQ. For this the tool is optimized fo
 
 The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern:
 ![alt text](https://github.com/imatix/zguide/raw/master/images/fig4.png "Publisher/Subscriber pattern")
+
 For this reason the ZeroMQ library is needed to receive data from the IPC sockets.
 
 ## Usage
