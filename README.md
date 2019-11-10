@@ -5,6 +5,7 @@ signal ID over a IPC protocol based on ZeroMQ. For this the tool is optimized fo
 
 The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern:
 ![alt text](https://github.com/imatix/zguide/raw/master/images/fig4.png "Publisher/Subscriber pattern")
+For this reason the ZeroMQ library is needed to receive data from the IPC sockets.
 
 ## Usage
 Say this DBC is given:
@@ -75,14 +76,14 @@ Now we simply can start the server:
 ```
 CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --dbc=network.dbc --config=config.cfg
 ```
-The `CanLogSyncServ` is now broadcasting the physical signal values over those two ipc_links.
+The `CanLogSyncServ` is now broadcasting the physical signal values over those two IPC sockets.
 
 > The `Sync` in `CanLogSyncServer` stands for synchronizing, this means,
 > the tool is atomic braodcasting all the actual frames which belong into one sampe_rate interval.
-> So if you receive something about a ipc_link, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
+> So if you receive something about a IPC socket, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
 
-Now we can subscribe to those ipc_links like this:
+Now we can subscribe to those IPC sockets like this:
 ```
 int main (int argc, char *argv[])
 {
