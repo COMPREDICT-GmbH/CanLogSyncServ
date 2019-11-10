@@ -73,10 +73,10 @@ CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ip
 ```
 The `CanLogSyncServ` is now broadcasting the physical signal values over those two ipc_links.
 
-NOTE: The `Sync` in `CanLogSyncServer` stands for synchronizing, this means,
-the tool is atomic braodcasting all the actual frames which belong into one sampe_rate interval.
-So if you receive something about a ipc_link, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
-So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
+> The `Sync` in `CanLogSyncServer` stands for synchronizing, this means,
+> the tool is atomic braodcasting all the actual frames which belong into one sampe_rate interval.
+> So if you receive something about a ipc_link, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
+> So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
 
 Now we can receive data about those ipc_links like this:
 ```
