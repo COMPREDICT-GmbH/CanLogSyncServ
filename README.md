@@ -2,6 +2,10 @@
 `CanLogSyncServ` is a small and lightweight tool for providing a easy accessable interface to DBC CAN signals by an user defined
 signal ID over a IPC protocol based on ZeroMQ. For this the tool is optimized for performance (not perfectly optimized yet).
 
+
+The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern:
+![alt text](https://github.com/imatix/zguide/raw/master/images/fig4.png "Publisher/Subscriber pattern")
+
 ## Usage
 Say this DBC is given:
 
@@ -78,7 +82,7 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 > So if you receive something about a ipc_link, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
 
-Now we can receive data about those ipc_links like this:
+Now we can subscribe to those ipc_links like this:
 ```
 int main (int argc, char *argv[])
 {
