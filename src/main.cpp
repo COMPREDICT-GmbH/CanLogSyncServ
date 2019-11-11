@@ -51,9 +51,9 @@ int main(int argc, char** argv)
 	const auto& ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
 	const auto& ifaces           = vm["iface"].as<std::vector<std::string>>();
 	const auto& sample_rate      = vm["sample_rate"].as<uint64_t>();
-	const auto& cmd_signals      = vm["signal"].as<std::vector<std::string>>();
-
-	ConfigParser cfg{cmd_signals, config_file_path};
+	const auto& cmd_signals      = vm["signal"];
+    
+	ConfigParser cfg{cmd_signals.empty() ? std::vector<std::string>{} : cmd_signals.as<std::vector<std::string>>(), config_file_path};
 	const auto& cfg_sigs = cfg.signals();
 
 	Vector::DBC::Network network;
