@@ -86,27 +86,32 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 
 Now we can subscribe to those IPC sockets like this:
 ```
+struct Signal
+{
+    uint64_t id;
+    double value;
+};
 int main (int argc, char *argv[])
 {
     zmq::context_t context(1);
     zmq::socket_t subscriber(context, ZMQ_SUB);
     // either
     subscriber.connect("ipc:///tmp/network.ipc");
-    // or 
-    //subscriber.connect("tcp://localhost:5556");
+    // or
+    // subscriber.connect("tcp://localhost:5556");
     subscriber.setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
     while (1)
     {
         zmq::message_t update;
         subscriber.recv(&update);
         char* data = static_cast<char*>(update.data());
-        auto update_size = update.size();
-        std::size_t nsigs = update.size() / 16;
+        uint64_t timestamp = *((uint64_t*)data);
+        uint64_t nsigs = *((uint64_t*)(data + 8));
+        Signal* sigs = (Signal*)(data + 16);
+        std::cout << "(" << timestamp << ") Received data:" << std::endl;
         for (std::size_t i = 0; i < nsigs; i++)
         {
-            uint64_t id = *((uint64_t*)&data[i * 16]);
-            double value = *((double*)&data[i * 16 + 8]);
-            std::cout << "id=" << id << " value=" << value << std::endl;
+            std::cout << "id=" << sigs[i].id << " value=" << sigs[i].value << std::endl;
         }
     }
     return 0;
