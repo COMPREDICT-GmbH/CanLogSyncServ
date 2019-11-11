@@ -139,3 +139,6 @@ make install
 ### Windows
 Not supported yet.
 
+## TODO
+  * Consider byte order (maybe using protobuf)
+
