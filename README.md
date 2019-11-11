@@ -133,6 +133,7 @@ mkdir CanLogSyncServ/build
 cd CanLogSyncServ/build
 ccmake ..
 make
+make install
 ```
 
 ### Windows
