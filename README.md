@@ -62,7 +62,11 @@ BO_ 3 Msg_2: 3
 ```
 And we want log Msg_0::Sig_0, Msg_1::Sig_1, Msg_2::Sig_0, Msg_2::Sig_2.
 
-Therefor we have to create a config file we can pass to the `CanLogSyncServ`:
+Therefor we have either can start the `CanLogSyncServ`-server by specifiying the signals in the command line:
+```
+CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --dbc=network.dbc --signal="1;Sig_0;0" "2;Sig_1;1" "3;Sig_0;2" "3;Sig_2;3"
+```
+or by creating a config file that we can pass to the `CanLogSyncServ`-server:
 
 config.cfg:
 ```
@@ -72,8 +76,7 @@ config.cfg:
 3;Sig_0;2
 3;Sig_2;3
 ```
-
-Now we simply can start the server:
+And run:
 ```
 CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --dbc=network.dbc --config=config.cfg
 ```
