@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	po::options_description desc;
 	desc.add_options()
 		("help", "produce help message")
-		("config", po::value<std::string>()->required(), "config file")
+		("config", po::value<std::string>()->default_value(""), "config file")
 		("dbc", po::value<std::string>()->required(), "DBC file")
 		("ipc_link", po::value<std::vector<std::string>>()->multitoken()->required(),
 			"List of IPC links. E.g. ipc:///tmp/weather.ipc or tcp://*:5556, "
