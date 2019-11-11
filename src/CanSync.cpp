@@ -122,7 +122,7 @@ void CanSync::worker()
 				}
 				for (const auto& sub_func : _sub_funcs)
 				{
-					sub_func(sub_data);
+					sub_func(_next_fire, sub_data);
 				}
 				_next_fire += _sr;
 				for (auto& signal_fire_data : _signal_queues)

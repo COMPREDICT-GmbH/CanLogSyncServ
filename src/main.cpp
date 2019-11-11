@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
 	
 	ZmqServer zmq_server{ipc_links};
-	can_sync.sub([&zmq_server](const auto& param) { zmq_server.cb_sub(param); });
+	can_sync.sub([&zmq_server](const auto& p1, const auto& p2) { zmq_server.cb_sub(p1, p2); });
 	can_sync.start();
 
 	while (1)

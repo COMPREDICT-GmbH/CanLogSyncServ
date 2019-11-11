@@ -9,7 +9,7 @@ class ZmqServer
 {
 public:
 	ZmqServer(const std::vector<std::string>& ipc_links);
-	void cb_sub(const std::vector<CanSync::SubData>& sub_data);
+	void cb_sub(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& sub_data);
 
 private:
 	zmq::context_t _context;

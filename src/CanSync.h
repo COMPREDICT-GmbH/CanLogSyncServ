@@ -26,7 +26,7 @@ public:
 	} __attribute__((packed));
 
 	using unique_lock_t = std::unique_lock<std::mutex>;
-	using sub_func_t = std::function<void(const std::vector<SubData>&)>;
+	using sub_func_t = std::function<void(std::chrono::microseconds timetamp, const std::vector<SubData>&)>;
 
 	CanSync(std::chrono::microseconds sr, std::vector<CanBus>&& can_buses);
 	~CanSync();
