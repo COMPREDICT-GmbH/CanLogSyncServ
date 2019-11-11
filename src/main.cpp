@@ -24,11 +24,12 @@ int main(int argc, char** argv)
 		("config", po::value<std::string>()->required(), "config file")
 		("dbc", po::value<std::string>()->required(), "DBC file")
 		("ipc_link", po::value<std::vector<std::string>>()->multitoken()->required(),
-			"The ipc link. E.g. ipc:///tmp/weather.ipc or tcp://*:5556, "
+			"List of IPC links. E.g. ipc:///tmp/weather.ipc or tcp://*:5556, "
 			"for a exhaustive list of supported protocols, please go to http://wiki.zeromq.org/docs:features "
 			"under the Protocols section.")
-		("iface", po::value<std::vector<std::string>>()->multitoken()->required(), "CAN interfaces")
-		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds");
+		("iface", po::value<std::vector<std::string>>()->multitoken()->required(), "list of CAN interfaces")
+		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds")
+		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals to log");
 
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -45,13 +46,14 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	po::notify(vm);
-	auto config_file_path = vm["config"].as<std::string>();
-	auto dbc_file_path    = vm["dbc"].as<std::string>();
-	auto ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
-	auto ifaces           = vm["iface"].as<std::vector<std::string>>();
-	auto sample_rate      = vm["sample_rate"].as<uint64_t>();
+	const auto& config_file_path = vm["config"].as<std::string>();
+	const auto& dbc_file_path    = vm["dbc"].as<std::string>();
+	const auto& ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
+	const auto& ifaces           = vm["iface"].as<std::vector<std::string>>();
+	const auto& sample_rate      = vm["sample_rate"].as<uint64_t>();
+	const auto& cmd_signals      = vm["signal"].as<std::vector<std::string>>();
 
-	ConfigParser cfg{config_file_path};
+	ConfigParser cfg{cmd_signals, config_file_path};
 	const auto& cfg_sigs = cfg.signals();
 
 	Vector::DBC::Network network;

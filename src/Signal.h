@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <chrono>
 #include <Vector/DBC.h>
 #include "DBCSignal_Wrapper.h"
 
