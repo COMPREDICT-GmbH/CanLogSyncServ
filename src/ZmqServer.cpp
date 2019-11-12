@@ -1,5 +1,6 @@
 
 #include "ZmqServer.h"
+#include <iostream>
 
 ZmqServer::ZmqServer(const std::vector<std::string>& ipc_links)
 {

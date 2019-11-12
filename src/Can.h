@@ -33,9 +33,11 @@ public:
 	
 private:
 	int _socket;
-	struct sockaddr_can _addr;
-	struct ifreq _ifr;
+	mutable ifreq _ifr;
+	mutable sockaddr_can _addr;
+	mutable Frame _frame;
 	mutable fd_set _rdfs;
-	mutable struct msghdr _msg;
-	char _ctrlmsg[CMSG_SPACE(sizeof(struct timeval) + 3 * sizeof(struct timespec) + sizeof(__u32))];
+	mutable iovec _iov;
+	mutable msghdr _msg;
+	mutable char _ctrlmsg[CMSG_SPACE(sizeof(timeval) + 3 * sizeof(timespec) + sizeof(__u32))];
 };

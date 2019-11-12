@@ -5,14 +5,9 @@ cmake_minimum_required (VERSION 3.8)
 
 project("CanLogSyncServ")
 
-set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(CMAKE_CXX_STANDARD 17)
-
-#set(ZeroMQ_INCLUDE_DIR "" CACHE FILEPATH "Path to zmq.hpp")
-#set(ZeroMQ_LIBRARY "" CACHE FILEPATH "Path to libzmq.so")
-#set(VectorDBC_INCLUDE_DIR "" CACHE FILEPATH "Path to Vector/DBC.hpp")
-#set(Vector_DBC_LIBRARY "" CACHE FILEPATH "Path to libVector_DBC.so")
 
 if (UNIX)
 	find_package(PkgConfig)

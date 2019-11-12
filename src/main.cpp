@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 	can_sync.sub([&zmq_server](const auto& p1, const auto& p2) { zmq_server.cb_sub(p1, p2); });
 	can_sync.start();
 
-	while (1)
+	while (can_sync.running())
 	{
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}

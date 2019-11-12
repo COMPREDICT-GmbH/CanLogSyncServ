@@ -10,13 +10,14 @@ Can::Can(const std::string& ifname)
 	{
 		throw std::runtime_error("::socket failed");
 	}
-	std::memcpy(_ifr.ifr_ifrn.ifrn_name, ifname.c_str(), ifname.size() + 1);
+	_addr.can_family = AF_CAN;
+	std::memset(((ifreq&)_ifr).ifr_name, 0, sizeof(_ifr.ifr_name));
+	std::memcpy(((ifreq&)_ifr).ifr_name, ifname.c_str(), ifname.size());
 	if (::ioctl(_socket, SIOCGIFINDEX, &_ifr) < 0)
 	{
 		throw std::runtime_error("::ioctl failed");
 	}
-	_addr.can_family = AF_CAN;
-	_addr.can_ifindex = _ifr.ifr_ifru.ifru_ivalue;
+	_addr.can_ifindex = _ifr.ifr_ifindex;
 	
 	/* try to switch the socket into CAN FD mode */
 	const int canfd_on = 1;
@@ -32,13 +33,16 @@ Can::Can(const std::string& ifname)
 	{
 		throw std::runtime_error("::bind failed");
 	}
-	_msg.msg_name = &_addr;
-	_msg.msg_control = &_ctrlmsg;
+	_iov.iov_base = &((Frame&)_frame).raw_frame;
+	_msg.msg_name = &((sockaddr_can&)_addr);
+	_msg.msg_iov = &((iovec&)_iov);
+	_msg.msg_iovlen = 1;
+	_msg.msg_control = (void*)&_ctrlmsg;
 }
 Can::Can(Can&& other)
 {
 	std::memcpy(this, &other, sizeof(Can));
-	other._socket = 0;
+	std::memset(&other, 0, sizeof(other));
 }
 Can::~Can()
 {
@@ -49,50 +53,46 @@ Can::~Can()
 }
 bool Can::bind()
 {
-	return ::bind(_socket, (struct sockaddr*)&_addr, sizeof(_addr)) >= 0;
+	return ::bind(_socket, (sockaddr*)&_addr, sizeof(_addr)) >= 0;
 }
 std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 {
 	FD_ZERO(&_rdfs);
 	FD_SET(_socket, &_rdfs);
-	struct timeval tv;
+	timeval tv;
 	tv.tv_sec = timeout.count() / (1000 * 1000);
 	tv.tv_usec = timeout.count() % (1000 * 1000);
-	if (::select(_socket + 1, &_rdfs, NULL, NULL, &tv) > 0 &&
-		FD_ISSET(_socket, &_rdfs))
+	int nbytes = ::select(_socket + 1, (fd_set*)&_rdfs, NULL, NULL, &tv);
+	if (0 < nbytes && FD_ISSET(_socket, &_rdfs))
 	{
-		Frame frame;
-		struct iovec iov;
-		_msg.msg_iov = &iov;
-		_msg.msg_iovlen = 1;
+		_iov.iov_base = &_frame.raw_frame;
+		//_iov.iov_len = sizeof(_frame.raw_frame);
+		_msg.msg_name = &_addr;
+		_msg.msg_iov = &_iov;
+		//_msg.msg_iovlen = 1;
+		//_msg.msg_control = (void*)_ctrlmsg;
 		_msg.msg_namelen = sizeof(_addr);
 		_msg.msg_controllen = sizeof(_ctrlmsg);
 		_msg.msg_flags = 0;
-		iov.iov_base = &frame.raw_frame;
-		iov.iov_len = sizeof(frame.raw_frame);
-
-		int nbytes = ::recvmsg(_socket, &_msg, 0);
-		struct cmsghdr *cmsg;
-		for (cmsg = CMSG_FIRSTHDR(&_msg); cmsg && (cmsg->cmsg_level == SOL_SOCKET); cmsg = CMSG_NXTHDR(&_msg, cmsg))
+		
+		errno = 0;
+		int nbytes = ::recvmsg(_socket, (msghdr*)&_msg, 0);
+		cmsghdr* cmsg;
+		for (cmsg = CMSG_FIRSTHDR((msghdr*)&_msg);
+			cmsg && (cmsg->cmsg_level == SOL_SOCKET);
+			cmsg = CMSG_NXTHDR((msghdr*)&_msg, cmsg))
 		{
 			if (cmsg->cmsg_type == SO_TIMESTAMP)
 			{
-				struct timeval* ptv = (struct timeval*)CMSG_DATA(cmsg);
-				frame.timestamp = std::chrono::microseconds{ptv->tv_sec * 1000 * 1000 + ptv->tv_usec};
+				timeval* ptv = (timeval*)CMSG_DATA(cmsg);
+				((Frame&)_frame).timestamp = std::chrono::microseconds{ptv->tv_sec * 1000 * 1000 + ptv->tv_usec};
 			}
 			else if (cmsg->cmsg_type == SO_TIMESTAMPING)
 			{
-				struct timespec *stamp = (struct timespec *)CMSG_DATA(cmsg);
-				/*
-					* stamp[0] is the software timestamp
-					* stamp[1] is deprecated
-					* stamp[2] is the raw hardware timestamp
-					* See chapter 2.1.2 Receive timestamps in
-					* linux/Documentation/networking/timestamping.txt
-					*/
-				frame.timestamp = std::chrono::microseconds{stamp[2].tv_sec * 1000 * 1000 + stamp[2].tv_nsec / 1000};
+				timespec *stamp = (timespec *)CMSG_DATA(cmsg);
+				((Frame&)_frame).timestamp = std::chrono::microseconds{stamp[2].tv_sec * 1000 * 1000 + stamp[2].tv_nsec / 1000};
 			}
-			return frame;
+			return (Frame&)_frame;
 		}
 	}
 	return std::nullopt;

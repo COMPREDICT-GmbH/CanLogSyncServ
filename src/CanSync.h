@@ -30,6 +30,7 @@ public:
 
 	CanSync(std::chrono::microseconds sr, std::vector<CanBus>&& can_buses);
 	~CanSync();
+	bool running() const;
 	void start();
 	void stop();
 	void sub(sub_func_t&& sub_func);

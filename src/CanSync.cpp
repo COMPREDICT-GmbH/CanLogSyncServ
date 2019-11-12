@@ -13,6 +13,10 @@ CanSync::~CanSync()
 {
 	stop();
 }
+bool CanSync::running() const
+{
+	return _running;
+}
 void CanSync::start()
 {
 	if (!_running)
@@ -31,7 +35,6 @@ void CanSync::start()
 				can_bus.set_user_data(cs_id.first, cs_id.second, user_data);
 			}
 		}
-
 		_next_fire = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()) + _sr;
 		_running = true;
 		_th_worker = std::thread{[this]() { this->worker(); }};
@@ -60,8 +63,8 @@ void CanSync::stop()
 			}
 		}
 		_signal_queues.clear();
+		_ths_can_read.clear();
 	}
-	_ths_can_read.clear();
 }
 void CanSync::sub(sub_func_t&& sub_func)
 {
@@ -81,7 +84,8 @@ void CanSync::worker()
 		{
 			// poll data
 			unique_lock_t lock{_mx_signal_data_queue};
-			if (_cond_var_frame_recv.wait_for(lock, std::chrono::milliseconds{100}, [this]() { return _signal_data_queue.size() > 0; }))
+			bool new_data = _cond_var_frame_recv.wait_for(lock, std::chrono::milliseconds{100}, [this]() { return _signal_data_queue.size() > 0; });
+			if (new_data)
 			{
 				while (_signal_data_queue.size())
 				{
