@@ -59,10 +59,15 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 		_iov.iov_base = &_frame.raw_frame;
 		_msg.msg_name = &_addr;
 		_msg.msg_iov = &_iov;
+		_msg.msg_iovlen = 1;
 		_msg.msg_namelen = sizeof(_addr);
 		_msg.msg_controllen = sizeof(_ctrlmsg);
 		_msg.msg_flags = 0;
 		int nbytes = ::recvmsg(_socket, &_msg, 0);
+		if (nbytes < 0)
+		{
+			throw std::runtime_error("::recvmsg failed");
+		}
 		cmsghdr* cmsg;
 		for (cmsg = CMSG_FIRSTHDR(&_msg);
 			cmsg && (cmsg->cmsg_level == SOL_SOCKET);
