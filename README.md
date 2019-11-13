@@ -88,7 +88,13 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
 
 Now we can subscribe to those IPC sockets like this:
+
+C++
 ```
+#include <zmq.hpp>
+#include <iostream>
+#include <sstream>
+#include "Signal.pb.h"
 struct Signal
 {
     uint64_t id;
@@ -122,6 +128,24 @@ int main (int argc, char *argv[])
     }
     return 0;
 }
+```
+or the python3 way:
+```
+import zmq
+import Signal_pb2
+
+context = zmq.Context()
+socket = context.socket(zmq.SUB)
+socket.connect("ipc:///tmp/weather.ipc")
+socket.setsockopt_string(zmq.SUBSCRIBE, "")
+while True:
+    data = socket.recv()
+    sigs = Signal_pb2.Pb_Signals()
+    sigs.ParseFromString(data)
+    print("(" + str(sigs.timestamp) + ") Received data:")
+    for sig in sigs.sigs:
+        print("id=" + str(sig.id) + " value=" + str(sig.value))
+
 ```
 There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official site of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf).
 
