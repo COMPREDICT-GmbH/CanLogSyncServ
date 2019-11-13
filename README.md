@@ -131,7 +131,7 @@ import Signal_pb2
 
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
-socket.connect("ipc:///tmp/weather.ipc")
+socket.connect("ipc:///tmp/network.ipc")
 socket.setsockopt_string(zmq.SUBSCRIBE, "")
 while True:
     data = socket.recv()
