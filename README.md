@@ -62,7 +62,7 @@ BO_ 3 Msg_2: 3
 ```
 And we want log Msg_0::Sig_0, Msg_1::Sig_1, Msg_2::Sig_0, Msg_2::Sig_2.
 
-Therefor we have either can start the `CanLogSyncServ`-server by specifiying the signals in the command line:
+Therefor we either can start the `CanLogSyncServ`-server by specifiying the signals in the command line:
 ```
 CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --dbc=network.dbc --signal="1;Sig_0;0" "2;Sig_1;1" "3;Sig_0;2" "3;Sig_2;3"
 ```
@@ -83,7 +83,7 @@ CanLogSyncServ --iface=vcan0 --sample_rate=5000 --ipc_link=ipc:///tmp/network.ip
 The `CanLogSyncServ` is now broadcasting the physical signal values over those two IPC sockets.
 
 > The `Sync` in `CanLogSyncServer` stands for synchronizing, this means,
-> the tool is atomic braodcasting all the actual frames which belong into one sampe_rate interval.
+> the tool is atomic braodcasting all the actual frames which belong into one `sample_rate` interval.
 > So if you receive something about a IPC socket, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
 
@@ -95,11 +95,6 @@ C++
 #include <iostream>
 #include <sstream>
 #include "Signal.pb.h"
-struct Signal
-{
-    uint64_t id;
-    double value;
-};
 int main (int argc, char *argv[])
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
