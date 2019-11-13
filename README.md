@@ -95,6 +95,14 @@ C++
 #include <iostream>
 #include <sstream>
 #include "Signal.pb.h"
+struct membuf
+	: std::streambuf
+{
+    membuf(char* begin, char* end)
+	{
+        this->setg(begin, begin, end);
+    }
+};
 int main (int argc, char *argv[])
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
