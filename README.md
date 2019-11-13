@@ -142,7 +142,7 @@ while True:
         print("id=" + str(sig.id) + " value=" + str(sig.value))
 
 ```
-There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official site of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf).
+There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf).
 
 ## Build
 ### Dependencies
