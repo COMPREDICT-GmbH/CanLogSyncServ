@@ -1,12 +1,12 @@
 # CanLogSyncServ
 `CanLogSyncServ` is a small and lightweight tool for providing a easy accessable interface to DBC CAN signals by an user defined
-signal ID over a IPC protocol based on ZeroMQ. For this the tool is optimized for performance (not perfectly optimized yet).
+signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool is optimized for performance (not perfectly optimized yet).
 
 
-The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern:
+The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern in combination with protobuf:
 ![alt text](https://github.com/imatix/zguide/raw/master/images/fig4.png "Publisher/Subscriber pattern")
 
-For this reason the ZeroMQ library is needed to receive data from the IPC sockets.
+For this reason the ZeroMQ and protobuf libraries are needed to receive data from the IPC sockets.
 
 ## Usage
 Say this DBC is given:
@@ -96,6 +96,7 @@ struct Signal
 };
 int main (int argc, char *argv[])
 {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     zmq::context_t context(1);
     zmq::socket_t subscriber(context, ZMQ_SUB);
     // either
@@ -108,19 +109,21 @@ int main (int argc, char *argv[])
         zmq::message_t update;
         subscriber.recv(&update);
         char* data = static_cast<char*>(update.data());
-        uint64_t timestamp = *((uint64_t*)data);
-        uint64_t nsigs = *((uint64_t*)(data + 8));
-        Signal* sigs = (Signal*)(data + 16);
-        std::cout << "(" << timestamp << ") Received data:" << std::endl;
-        for (std::size_t i = 0; i < nsigs; i++)
+        CanLogSyncServ::Pb_Signals sigs;
+        membuf mb{data, data + update.size() + 1};
+        std::istream is{&mb};
+        sigs.ParseFromIstream(&is);
+        std::cout << "(" << sigs.timestamp() << ") Received data:" << std::endl;
+        for (std::size_t i = 0; i < sigs.sigs_size(); i++)
         {
-            std::cout << "id=" << sigs[i].id << " value=" << sigs[i].value << std::endl;
+            const auto& sig = sigs.sigs(i);
+            std::cout << "id=" << sig.id() << " value=" << sig.value() << std::endl;
         }
     }
     return 0;
 }
 ```
-There are also many other bindings for other languages to ZeroMQ. For more informations look at the official site of [ZeroMQ](https://zeromq.org/get-started/).
+There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official site of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf).
 
 ## Build
 ### Dependencies
@@ -128,6 +131,7 @@ There are also many other bindings for other languages to ZeroMQ. For more infor
   * [cppzmq](https://github.com/zeromq/cppzmq)
   * [Vector_DBC](https://bitbucket.org/tobylorenz/vector_dbc/src/master/)
   * [Boost program_options](https://www.boost.org/)
+  * [protobuf](https://github.com/protocolbuffers/protobuf)
   
 ### Unix
 ```
