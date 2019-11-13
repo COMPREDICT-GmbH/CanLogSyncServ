@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package CanLogSyncServ;
+
+message Pb_Signal
+{
+    uint64 id = 1;
+    double value = 2;
+}
+
+message Pb_Signals
+{
+    uint64 timestamp = 1;
+    repeated Pb_Signal sigs = 2;
+}
+

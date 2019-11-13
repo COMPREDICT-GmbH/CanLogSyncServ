@@ -32,6 +32,7 @@ if (UNIX)
 endif ()
 
 find_package(Boost REQUIRED program_options)
+find_package(Protobuf REQUIRED)
 
 # Include sub-projects.
 add_subdirectory("src")
