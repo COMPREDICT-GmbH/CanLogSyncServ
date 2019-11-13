@@ -96,10 +96,10 @@ C++
 #include <sstream>
 #include "Signal.pb.h"
 struct membuf
-	: std::streambuf
+    : std::streambuf
 {
     membuf(char* begin, char* end)
-	{
+    {
         this->setg(begin, begin, end);
     }
 };
