@@ -63,48 +63,50 @@ int main(int argc, char** argv)
 	}
 
 	std::vector<std::pair<canid_t, std::vector<DBCSignal_Wrapper>>> msgs;
-	for (const auto& msg : network.messages)
+	std::vector<CanBus> can_buses;
 	{
-		std::vector<DBCSignal_Wrapper> wrappers;
-		std::shared_ptr<Vector::DBC::Signal> mux_sig;
-		auto sig_mux_iter = std::find_if(msg.second.signals.begin(), msg.second.signals.end(),
-			[](const auto& sig)
-			{
-				return sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexorSwitch;
-			});
-	      	if (sig_mux_iter != msg.second.signals.end())
+		for (const auto& msg : network.messages)
 		{
-			mux_sig = std::make_shared<Vector::DBC::Signal>(sig_mux_iter->second);
-		}
-		for (const auto& sig : msg.second.signals)
-		{
-			auto iter = std::find_if(cfg_sigs.begin(), cfg_sigs.end(),
-				[&](const ConfigParser::CfgSignal& cfg_sig)
+			std::vector<DBCSignal_Wrapper> wrappers;
+			std::shared_ptr<Vector::DBC::Signal> mux_sig;
+			auto sig_mux_iter = std::find_if(msg.second.signals.begin(), msg.second.signals.end(),
+				[](const auto& sig)
 				{
-					return cfg_sig.canid == msg.first && sig.second.name == cfg_sig.signal_name;
+					return sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexorSwitch;
 				});
-			if (iter != cfg_sigs.end())
+		      	if (sig_mux_iter != msg.second.signals.end())
 			{
-				DBCSignal_Wrapper sig_wrapper;
-				sig_wrapper.id = iter->signal_id;
-				sig_wrapper.dbc_signal = sig.second;
-				if (sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexedSignal)
+				mux_sig = std::make_shared<Vector::DBC::Signal>(sig_mux_iter->second);
+			}
+			for (const auto& sig : msg.second.signals)
+			{
+				auto iter = std::find_if(cfg_sigs.begin(), cfg_sigs.end(),
+					[&](const ConfigParser::CfgSignal& cfg_sig)
+					{
+						return cfg_sig.canid == msg.first && sig.second.name == cfg_sig.signal_name;
+					});
+				if (iter != cfg_sigs.end())
 				{
-					sig_wrapper.dbc_mux_signal = mux_sig;
+					DBCSignal_Wrapper sig_wrapper;
+					sig_wrapper.id = iter->signal_id;
+					sig_wrapper.dbc_signal = sig.second;
+					if (sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexedSignal)
+					{
+						sig_wrapper.dbc_mux_signal = mux_sig;
+					}
+					wrappers.push_back(sig_wrapper);
 				}
-				wrappers.push_back(sig_wrapper);
+			}
+			if (wrappers.size())
+			{
+				msgs.push_back(std::make_pair(msg.second.id, std::move(wrappers)));
 			}
 		}
-		if (wrappers.size())
-		{
-			msgs.push_back(std::make_pair(msg.second.id, std::move(wrappers)));
-		}
-	}
 
-	std::vector<CanBus> can_buses;
-	for (const auto& iface : ifaces)
-	{
-		can_buses.emplace_back(0, Can{iface}, std::move(msgs));
+		for (const auto& iface : ifaces)
+		{
+			can_buses.emplace_back(0, Can{iface}, std::move(msgs));
+		}
 	}
 	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
 	
