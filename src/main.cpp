@@ -66,6 +66,16 @@ int main(int argc, char** argv)
 	for (const auto& msg : network.messages)
 	{
 		std::vector<DBCSignal_Wrapper> wrappers;
+		std::shared_ptr<Vector::DBC::Signal> mux_sig;
+		auto sig_mux_iter = std::find_if(msg.second.signals.begin(), msg.second.signals.end(),
+			[](const auto& sig)
+			{
+				return sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexorSwitch;
+			});
+	      	if (sig_mux_iter != msg.second.signals.end())
+		{
+			mux_sig = std::make_shared<Vector::DBC::Signal>(sig_mux_iter->second);
+		}
 		for (const auto& sig : msg.second.signals)
 		{
 			auto iter = std::find_if(cfg_sigs.begin(), cfg_sigs.end(),
@@ -77,7 +87,11 @@ int main(int argc, char** argv)
 			{
 				DBCSignal_Wrapper sig_wrapper;
 				sig_wrapper.id = iter->signal_id;
-				sig_wrapper.dbc_signal= sig.second;
+				sig_wrapper.dbc_signal = sig.second;
+				if (sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexedSignal)
+				{
+					sig_wrapper.dbc_mux_signal = mux_sig;
+				}
 				wrappers.push_back(sig_wrapper);
 			}
 		}

@@ -28,19 +28,27 @@ std::vector<Signal> CanBus::recv(std::chrono::microseconds timeout) const
 		{
 			for (const auto& signal : iter_signals->second)
 			{
+				auto& dbc_sig = const_cast<Vector::DBC::Signal&>(signal.second.dbc_signal);
+				auto& dbc_mux_sig = const_cast<std::shared_ptr<Vector::DBC::Signal>&>
+						(signal.second.dbc_mux_signal);
+				
 				const auto& raw = frame->raw_frame;
 				Signal sig;
 				sig.id = signal.second.id;
 				std::vector<uint8_t> data{
 					raw.data[0], raw.data[1], raw.data[2], raw.data[3],
 					raw.data[4], raw.data[5], raw.data[6], raw.data[7]};
-				sig.value = const_cast<Vector::DBC::Signal&>(signal.second.dbc_signal).decode(data);
-				sig.value = const_cast<Vector::DBC::Signal&>(signal.second.dbc_signal).rawToPhysicalValue(sig.value);
-				sig.dbc_signal = &signal.second.dbc_signal;
-				sig.timestamp = frame->timestamp;
-				sig.bus_id = _bus_id;
-				sig.user_data = signal.first;
-				result.push_back(sig);
+				if (dbc_sig.multiplexor != Vector::DBC::Signal::Multiplexor::MultiplexedSignal ||
+					dbc_mux_sig->rawToPhysicalValue(dbc_mux_sig->decode(data)) ==
+						dbc_sig.multiplexerSwitchValue)
+				{
+					sig.value = dbc_sig.rawToPhysicalValue(dbc_sig.decode(data));
+					sig.dbc_signal = &signal.second.dbc_signal;
+					sig.timestamp = frame->timestamp;
+					sig.bus_id = _bus_id;
+					sig.user_data = signal.first;
+					result.push_back(sig);
+				}
 			}
 		}
 	}
