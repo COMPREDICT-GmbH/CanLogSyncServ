@@ -150,7 +150,7 @@ while True:
         print("id=" + str(sig.id) + " value=" + str(sig.value))
 
 ```
-There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf). To use the CanLogSyncServ, your wished language has be supported by both libraries (ZeroMQ and protobuf).
+There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf). To use the `CanLogSyncServ`, your wished language has to be supported by both libraries (ZeroMQ and protobuf).
 ## Build
 ### Dependencies
   * [libzmq](https://github.com/zeromq/libzmq)
