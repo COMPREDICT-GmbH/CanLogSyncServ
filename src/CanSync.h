@@ -10,7 +10,6 @@
 #include <condition_variable>
 #include <unordered_map>
 #include <functional>
-#include <Vector/DBC.h>
 
 #include "CanBus.h"
 #include "DBCSignal_Wrapper.h"

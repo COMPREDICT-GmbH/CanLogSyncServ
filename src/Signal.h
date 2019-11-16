@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <chrono>
-#include <Vector/DBC.h>
+#include <dbcppp/Network.h>
 #include "DBCSignal_Wrapper.h"
 
 struct Signal
@@ -12,7 +12,7 @@ struct Signal
 	id_t id;
 	uint64_t bus_id;
 	double value;
-	const Vector::DBC::Signal* dbc_signal;
+	std::shared_ptr<dbcppp::Signal> dbc_signal;
 	std::chrono::microseconds timestamp;
 	void* user_data;
 };

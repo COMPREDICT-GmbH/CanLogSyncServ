@@ -7,7 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <boost/program_options.hpp>
-#include <Vector/DBC.h>
+#include <dbcppp/Network.h>
+#include <dbcppp/DBC_Grammar.h>
 
 #include "ConfigParser.h"
 #include "Can.h"
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
 	ConfigParser cfg{cmd_signals.empty() ? std::vector<std::string>{} : cmd_signals.as<std::vector<std::string>>(), config_file_path};
 	const auto& cfg_sigs = cfg.signals();
 
-	Vector::DBC::Network network;
+	dbcppp::Network network;
 	{
 		std::ifstream dbc_file{dbc_file_path};
 		dbc_file >> network;
@@ -68,29 +69,29 @@ int main(int argc, char** argv)
 		for (const auto& msg : network.messages)
 		{
 			std::vector<DBCSignal_Wrapper> wrappers;
-			std::shared_ptr<Vector::DBC::Signal> mux_sig;
-			auto sig_mux_iter = std::find_if(msg.second.signals.begin(), msg.second.signals.end(),
+			std::shared_ptr<dbcppp::Signal> mux_sig;
+			auto sig_mux_iter = std::find_if(msg.second->signals.begin(), msg.second->signals.end(),
 				[](const auto& sig)
 				{
-					return sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexorSwitch;
+					return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
 				});
-		      	if (sig_mux_iter != msg.second.signals.end())
+		      	if (sig_mux_iter != msg.second->signals.end())
 			{
-				mux_sig = std::make_shared<Vector::DBC::Signal>(sig_mux_iter->second);
+				mux_sig = sig_mux_iter->second;
 			}
-			for (const auto& sig : msg.second.signals)
+			for (const auto& sig : msg.second->signals)
 			{
 				auto iter = std::find_if(cfg_sigs.begin(), cfg_sigs.end(),
 					[&](const ConfigParser::CfgSignal& cfg_sig)
 					{
-						return cfg_sig.canid == msg.first && sig.second.name == cfg_sig.signal_name;
+						return cfg_sig.canid == msg.first && sig.second->name == cfg_sig.signal_name;
 					});
 				if (iter != cfg_sigs.end())
 				{
 					DBCSignal_Wrapper sig_wrapper;
 					sig_wrapper.id = iter->signal_id;
 					sig_wrapper.dbc_signal = sig.second;
-					if (sig.second.multiplexor == Vector::DBC::Signal::Multiplexor::MultiplexedSignal)
+					if (sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxValue)
 					{
 						sig_wrapper.dbc_mux_signal = mux_sig;
 					}
@@ -99,7 +100,7 @@ int main(int argc, char** argv)
 			}
 			if (wrappers.size())
 			{
-				msgs.push_back(std::make_pair(msg.second.id, std::move(wrappers)));
+				msgs.push_back(std::make_pair(msg.second->id, std::move(wrappers)));
 			}
 		}
 
