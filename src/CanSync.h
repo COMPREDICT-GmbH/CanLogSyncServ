@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <string>
 #include <thread>
@@ -10,6 +11,7 @@
 #include <condition_variable>
 #include <unordered_map>
 #include <functional>
+#include <iostream>
 
 #include "CanBus.h"
 #include "DBCSignal_Wrapper.h"
@@ -23,16 +25,29 @@ public:
 		Signal::id_t id;
 		double value;
 	} __attribute__((packed));
+	class Subscriber
+	{
+	public:
+		virtual void update(std::chrono::microseconds timestamp, const std::vector<SubData>& data) = 0;
+	};
 
 	using unique_lock_t = std::unique_lock<std::mutex>;
-	using sub_func_t = std::function<void(std::chrono::microseconds timetamp, const std::vector<SubData>&)>;
 
 	CanSync(std::chrono::microseconds sr, std::vector<CanBus>&& can_buses);
 	~CanSync();
 	bool running() const;
 	void start();
 	void stop();
-	void sub(sub_func_t&& sub_func);
+	void subscribe(std::unique_ptr<Subscriber>&& sub);
+	void sub(std::unique_ptr<Subscriber>&& sub)
+	{
+		_subscribers.push_back(std::move(sub));
+		std::cout << "sub call" << std::endl;
+	}
+	void sub()
+	{
+		std::cout << "sub call" << std::endl;
+	}
 
 private:
 	void worker();
@@ -42,7 +57,7 @@ private:
 	std::chrono::microseconds _sr;
 	std::chrono::microseconds _next_fire;
 	std::atomic<bool> _running;
-	std::vector<sub_func_t> _sub_funcs;
+	std::vector<std::unique_ptr<Subscriber>> _subscribers;
 
 	std::thread _th_worker;
 	std::vector<std::thread> _ths_can_read;

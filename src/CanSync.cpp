@@ -66,9 +66,9 @@ void CanSync::stop()
 		_ths_can_read.clear();
 	}
 }
-void CanSync::sub(sub_func_t&& sub_func)
+void CanSync::subscribe(std::unique_ptr<CanSync::Subscriber>&& sub)
 {
-	_sub_funcs.push_back(std::move(sub_func));
+	//_subscribers.emplace_back(sub);
 }
 void CanSync::worker()
 {
@@ -124,9 +124,9 @@ void CanSync::worker()
 				{
 					sub_data.push_back(signal_fire_data.current);
 				}
-				for (const auto& sub_func : _sub_funcs)
+				for (auto& sub : _subscribers)
 				{
-					sub_func(_next_fire, sub_data);
+					sub->update(_next_fire, sub_data);
 				}
 				_next_fire += _sr;
 				for (auto& signal_fire_data : _signal_queues)

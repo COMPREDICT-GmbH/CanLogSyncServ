@@ -54,7 +54,8 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 	timeval tv;
 	tv.tv_sec = timeout.count() / (1000 * 1000);
 	tv.tv_usec = timeout.count() % (1000 * 1000);
-	if (0 < ::select(_socket + 1, &_rdfs, NULL, NULL, &tv) && FD_ISSET(_socket, &_rdfs))
+	int sel = ::select(_socket + 1, &_rdfs, NULL, NULL, &tv) && FD_ISSET(_socket, &_rdfs);
+	if (0 < sel)
 	{
 		_iov.iov_base = &_frame.raw_frame;
 		_msg.msg_name = &_addr;
@@ -64,9 +65,14 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 		_msg.msg_controllen = sizeof(_ctrlmsg);
 		_msg.msg_flags = 0;
 		int nbytes = ::recvmsg(_socket, &_msg, 0);
+		int err = errno;
 		if (nbytes < 0)
 		{
 			throw std::runtime_error("::recvmsg failed");
+		}
+		else if (nbytes == 0)
+		{
+			throw std::runtime_error("::recvmsg len 0, connection closed");
 		}
 		cmsghdr* cmsg;
 		for (cmsg = CMSG_FIRSTHDR(&_msg);

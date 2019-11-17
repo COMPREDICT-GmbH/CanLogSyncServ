@@ -15,7 +15,7 @@ ZmqServer::ZmqServer(const std::vector<std::string>& ipc_links)
 }
 ZmqServer::~ZmqServer()
 {
-	google::protobuf::ShutdownProtobufLibrary();
+	std::cout << "test" << std::endl;
 }
 void ZmqServer::cb_sub(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& sub_data)
 {
@@ -32,4 +32,3 @@ void ZmqServer::cb_sub(std::chrono::microseconds timestamp, const std::vector<Ca
 	zmq::const_buffer zmq_buffer{s_buffer.c_str(), s_buffer.size()};
 	_publisher.send(zmq_buffer);
 }
-

@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 				{
 					return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
 				});
-		      	if (sig_mux_iter != msg.second->signals.end())
+		    if (sig_mux_iter != msg.second->signals.end())
 			{
 				mux_sig = sig_mux_iter->second;
 			}
@@ -109,10 +109,36 @@ int main(int argc, char** argv)
 			can_buses.emplace_back(0, Can{iface}, std::move(msgs));
 		}
 	}
-	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
 	
+	struct Sub
+		: CanSync::Subscriber
+	{
+		Sub(ZmqServer& zmq_server) : _zmq_server{zmq_server} {}
+		virtual void update(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& data) override
+		{
+			_zmq_server.cb_sub(timestamp, data);
+		}
+		ZmqServer& _zmq_server;
+	};
+	struct SubTest
+		: CanSync::Subscriber
+	{
+		virtual void update(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& data) override
+		{
+		}
+	};
 	ZmqServer zmq_server{ipc_links};
-	can_sync.sub([&zmq_server](const auto& p1, const auto& p2) { zmq_server.cb_sub(p1, p2); });
+	//can_sync.subscribe(std::make_shared<Sub>(zmq_server));
+	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
+	can_sync.sub();
+	{
+		// for some reason I don't understand if the unique_ptr is passed directly to
+		// the subscribe funciton, the next ::recvmsg call in Can will return 0 what will
+		// lead to an error throw
+		// So the unique_ptr is firstly assigned to a tmp variable
+		auto sub = std::make_unique<Sub>(zmq_server);
+		can_sync.subscribe(std::move(sub));
+	}
 	can_sync.start();
 
 	while (can_sync.running())
