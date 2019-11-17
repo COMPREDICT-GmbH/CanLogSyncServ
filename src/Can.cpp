@@ -1,9 +1,9 @@
 
-#include "Can.h"
 #include <stdexcept>
 #include <cstring>
+#include "Can.h"
 
-Can::Can(const std::string& ifname)
+Can::Can(const std::string& ifname, const std::vector<canid_t>& filter_ids)
 {
 	_socket = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
 	if (_socket < 0)
@@ -25,6 +25,16 @@ Can::Can(const std::string& ifname)
 	if (::setsockopt(_socket, SOL_SOCKET, SO_TIMESTAMP, &timestamp_on, sizeof(timestamp_on)) < 0)
 	{
 		throw std::runtime_error("::setsockopt failed");
+	}
+	can_filter rfilter[filter_ids.size()];
+	for (std::size_t i = 0; i < filter_ids.size(); i++)
+	{
+		rfilter[i].can_id = filter_ids[i];
+		rfilter[i].can_mask = CAN_SFF_MASK;
+	}
+	if (::setsockopt(_socket, SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(can_filter) * filter_ids.size()) < 0)
+	{
+		throw std::runtime_error("::setsockopt failed, couldn't set CAN filters");
 	}
 	if (::bind(_socket, (sockaddr*)&_addr, sizeof(_addr)) < 0)
 	{

@@ -103,10 +103,14 @@ int main(int argc, char** argv)
 				msgs.push_back(std::make_pair(msg.second->id, std::move(wrappers)));
 			}
 		}
-
+		std::vector<canid_t> filter_ids;
+		for (const auto& msg : msgs)
+		{
+			filter_ids.push_back(msg.first);
+		}
 		for (const auto& iface : ifaces)
 		{
-			can_buses.emplace_back(0, Can{iface}, std::move(msgs));
+			can_buses.emplace_back(0, Can{iface, filter_ids}, std::move(msgs));
 		}
 	}
 	

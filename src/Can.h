@@ -24,7 +24,7 @@ public:
 		std::chrono::microseconds timestamp;
 	};
 
-	Can(const std::string& ifnames);
+	Can(const std::string& ifnames, const std::vector<canid_t>& filter_ids);
 	Can(const Can& other) = delete;
 	Can(Can&& other);
 	~Can();
