@@ -120,17 +120,8 @@ int main(int argc, char** argv)
 		}
 		ZmqServer& _zmq_server;
 	};
-	struct SubTest
-		: CanSync::Subscriber
-	{
-		virtual void update(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& data) override
-		{
-		}
-	};
 	ZmqServer zmq_server{ipc_links};
-	//can_sync.subscribe(std::make_shared<Sub>(zmq_server));
 	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
-	can_sync.sub();
 	{
 		// for some reason I don't understand if the unique_ptr is passed directly to
 		// the subscribe funciton, the next ::recvmsg call in Can will return 0 what will

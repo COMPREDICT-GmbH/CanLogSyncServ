@@ -68,7 +68,7 @@ void CanSync::stop()
 }
 void CanSync::subscribe(std::unique_ptr<CanSync::Subscriber>&& sub)
 {
-	//_subscribers.emplace_back(sub);
+	_subscribers.push_back(std::move(sub));
 }
 void CanSync::worker()
 {
@@ -94,7 +94,7 @@ void CanSync::worker()
 				}
 			}
 		}
-		if (signals.size() > 0)
+		if (signals.size())
 		{
 			// push data from the queue to the current data slot if the data from the queue is in the given time interval
 			for (const auto& signal : signals)

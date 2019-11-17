@@ -26,18 +26,18 @@ std::vector<Signal> CanBus::recv(std::chrono::microseconds timeout) const
 		auto iter_signals = _msgs.find(frame->raw_frame.can_id);
 		if (iter_signals != _msgs.end())
 		{
+			const auto& raw = frame->raw_frame;
+			uint64_t data =
+					(uint64_t)raw.data[0] | ((uint64_t)raw.data[1] << 8) | ((uint64_t)raw.data[2] << 16)
+				| ((uint64_t)raw.data[3] << 24) | ((uint64_t)raw.data[4] << 32) | ((uint64_t)raw.data[5] << 40)
+				| ((uint64_t)raw.data[6] << 48) | ((uint64_t)raw.data[7] << 56);
 			for (const auto& signal : iter_signals->second)
 			{
 				auto& dbc_sig = signal.second.dbc_signal;
 				auto& dbc_mux_sig = signal.second.dbc_mux_signal;
 				
-				const auto& raw = frame->raw_frame;
 				Signal sig;
 				sig.id = signal.second.id;
-				uint64_t data =
-					   raw.data[0] | (raw.data[1] << 8) | (raw.data[2] << 16)
-					| (raw.data[3] << 24) | (raw.data[4] << 32) | (raw.data[5] << 40)
-					| (raw.data[6] << 48) | (raw.data[7] << 56);
 				if (dbc_sig->multiplexer_indicator != dbcppp::Signal::Multiplexer::MuxValue ||
 					dbc_mux_sig->raw_to_phys(dbc_mux_sig->decode(data)) ==
 						dbc_sig->multiplexer_switch_value)
