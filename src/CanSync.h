@@ -39,15 +39,6 @@ public:
 	void start();
 	void stop();
 	void subscribe(std::unique_ptr<Subscriber>&& sub);
-	void sub(std::unique_ptr<Subscriber>&& sub)
-	{
-		_subscribers.push_back(std::move(sub));
-		std::cout << "sub call" << std::endl;
-	}
-	void sub()
-	{
-		std::cout << "sub call" << std::endl;
-	}
 
 private:
 	void worker();
