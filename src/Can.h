@@ -28,7 +28,6 @@ public:
 	Can(const Can& other) = delete;
 	Can(Can&& other);
 	~Can();
-	bool bind();
 	std::optional<Frame> recv(std::chrono::microseconds timeout) const;
 	
 private:

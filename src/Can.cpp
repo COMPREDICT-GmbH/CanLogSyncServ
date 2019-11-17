@@ -26,7 +26,7 @@ Can::Can(const std::string& ifname)
 	{
 		throw std::runtime_error("::setsockopt failed");
 	}
-	if (!bind())
+	if (::bind(_socket, (sockaddr*)&_addr, sizeof(_addr)) < 0)
 	{
 		throw std::runtime_error("::bind failed");
 	}
@@ -43,10 +43,6 @@ Can::~Can()
 		::close(_socket);
 	}
 }
-bool Can::bind()
-{
-	return ::bind(_socket, (sockaddr*)&_addr, sizeof(_addr)) >= 0;
-}
 std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 {
 	FD_ZERO(&_rdfs);
@@ -61,11 +57,11 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 		_msg.msg_name = &_addr;
 		_msg.msg_iov = &_iov;
 		_msg.msg_iovlen = 1;
+		_msg.msg_control = &_ctrlmsg;
 		_msg.msg_namelen = sizeof(_addr);
 		_msg.msg_controllen = sizeof(_ctrlmsg);
 		_msg.msg_flags = 0;
 		int nbytes = ::recvmsg(_socket, &_msg, 0);
-		int err = errno;
 		if (nbytes < 0)
 		{
 			throw std::runtime_error("::recvmsg failed");
@@ -74,11 +70,14 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 		{
 			throw std::runtime_error("::recvmsg len 0, connection closed");
 		}
+		_frame.timestamp = std::chrono::microseconds{0};
+		bool timestamp_received = false;
 		cmsghdr* cmsg;
 		for (cmsg = CMSG_FIRSTHDR(&_msg);
 			cmsg && (cmsg->cmsg_level == SOL_SOCKET);
 			cmsg = CMSG_NXTHDR(&_msg, cmsg))
 		{
+			timestamp_received = true;
 			if (cmsg->cmsg_type == SO_TIMESTAMP)
 			{
 				timeval* ptv = (timeval*)CMSG_DATA(cmsg);
@@ -89,8 +88,12 @@ std::optional<Can::Frame> Can::recv(std::chrono::microseconds timeout) const
 				timespec* stamp = (timespec *)CMSG_DATA(cmsg);
 				_frame.timestamp = std::chrono::microseconds{stamp[2].tv_sec * 1000 * 1000 + stamp[2].tv_nsec / 1000};
 			}
-			return _frame;
 		}
+		if (!timestamp_received)
+		{
+			throw std::runtime_error("couldnt' get timestamp from cmsghdr* struct");
+		}
+		return _frame;
 	}
 	return std::nullopt;
 }
