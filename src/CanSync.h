@@ -27,6 +27,7 @@ public:
 	class Subscriber
 	{
 	public:
+	    virtual ~Subscriber() = default;
 		virtual void update(std::chrono::microseconds timestamp, const std::vector<SubData>& data) = 0;
 	};
 

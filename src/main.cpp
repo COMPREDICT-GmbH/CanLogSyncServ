@@ -116,7 +116,6 @@ int main(int argc, char** argv)
 	}
 	po::notify(vm);
 	const auto& config_file_path = vm["config"].as<std::string>();
-	const auto& dbc_file_path    = vm["dbc"].as<std::string>();
 	const auto& ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
 	const auto& cmd_can_buses    = vm["can_bus"].as<std::vector<std::string>>();
 	const auto& sample_rate      = vm["sample_rate"].as<uint64_t>();
