@@ -155,7 +155,7 @@ There are also many other bindings for other languages to ZeroMQ and protobuf. F
 ### Dependencies
   * [libzmq](https://github.com/zeromq/libzmq)
   * [cppzmq](https://github.com/zeromq/cppzmq)
-  * [Vector_DBC](https://bitbucket.org/tobylorenz/vector_dbc/src/master/)
+  * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [Boost program_options](https://www.boost.org/)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   
