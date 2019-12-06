@@ -24,19 +24,26 @@ public:
 		std::chrono::microseconds timestamp;
 	};
 
-	Can(const std::string& ifnames, const std::vector<canid_t>& filter_ids);
-	Can(const Can& other) = delete;
+	Can(const std::string& name);
+	Can(const Can&) = delete;
+	const Can& operator=(const Can&) = delete;
 	Can(Can&& other);
-	~Can();
-	std::optional<Frame> recv(std::chrono::microseconds timeout) const;
+	Can& operator=(Can&& other);
+	virtual ~Can();
+	
+	std::optional<Frame> recv(std::chrono::microseconds duration);
+	void set_filters(const std::vector<canid_t>& id);
 	
 private:
-	int _socket;
-	mutable ifreq _ifr;
-	mutable sockaddr_can _addr;
-	mutable Frame _frame;
-	mutable fd_set _rdfs;
-	mutable iovec _iov;
-	mutable msghdr _msg;
-	mutable char _ctrlmsg[CMSG_SPACE(sizeof(timeval) + 3 * sizeof(timespec) + sizeof(__u32))];
+	void reconnect();
+	fd_set set_;
+	int32_t skt_;
+	iovec iov_[1];
+	canfd_frame frame_;
+	msghdr msg_;
+	char ctrlmsg_[CMSG_SPACE(sizeof(timeval) + 3 * sizeof(timespec) + sizeof(uint32_t))];
+	sockaddr_can addr_;
+	ifreq ifr_;
+	timeval tv_;
 };
+

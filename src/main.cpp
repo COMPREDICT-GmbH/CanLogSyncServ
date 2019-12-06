@@ -23,6 +23,7 @@ static void insert_msgs_into_canbuses(
 		const std::vector<ConfigParserCanBus::CfgCanBus>& cfg_can_buses
 	)
 {
+	std::vector<ConfigParserSignal::CfgSignal> del_list;
 	for (const ConfigParserCanBus::CfgCanBus& cfg_can_bus : cfg_can_buses)
 	{
 		dbcppp::Network network;
@@ -69,6 +70,8 @@ static void insert_msgs_into_canbuses(
 						sig_wrapper.dbc_mux_signal = mux_sig;
 					}
 					wrappers.push_back(sig_wrapper);
+					std::cout << "Added Signal: " << msg.second->name << "::" << sig.second->name << std::endl;
+					del_list.push_back(*iter);
 				}
 			}
 			if (wrappers.size())
@@ -81,8 +84,17 @@ static void insert_msgs_into_canbuses(
 		{
 			filter_ids.push_back(msg.first);
 		}
-		can_buses.emplace_back(0, Can{cfg_can_bus.iface, filter_ids}, std::move(msgs));
+		Can can{cfg_can_bus.iface};
+		can.set_filters(filter_ids);
+		can_buses.emplace_back(0, std::move(can), std::move(msgs));
 	}
+	std::vector<ConfigParserSignal::CfgSignal> delta;
+	std::set_difference(cfg_sigs.begin(), cfg_sigs.end(), del_list.begin(), del_list.end(), std::back_inserter(delta), [](const auto& lhs, const auto& rhs) { return lhs.canid < rhs.canid && lhs.signal_name < rhs.signal_name; });
+	if (delta.size())
+	{
+		throw std::runtime_error("Couldn't find signal with canid=" + std::to_string(delta[0].canid) + " and signal_name="  + delta[0].signal_name);
+	}
+
 }
 
 int main(int argc, char** argv)

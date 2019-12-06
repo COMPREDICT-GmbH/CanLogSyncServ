@@ -15,13 +15,13 @@ file(GLOB HPP *.h)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${ZeroMQ_INCLUDE_DIR})
-include_directories(${VectorDBC_INCLUDE_DIR})
+include_directories(${dbcppp_INCLUDE_DIR})
 include_directories(${Protobuf_INCLUDE_DIRS})
 
 add_executable(CanLogSyncServ Signal.pb.cc ${SRC} ${HPP})
 
-target_link_libraries(CanLogSyncServ ${Vector_DBC_LIBRARY} ${ZeroMQ_LIBRARY} ${Boost_LIBRARIES} ${Protobuf_LIBRARIES} pthread dbcppp)
+target_link_libraries(CanLogSyncServ ${dbcppp_LIBRARY} ${ZeroMQ_LIBRARY} ${Boost_LIBRARIES} ${Protobuf_LIBRARIES} pthread dbcppp)
 
 install(TARGETS CanLogSyncServ DESTINATION bin)
-install(FILES pb_signal.js pb_signals.js Pb_Signal.php Pb_Signals.php Signal.cs Signal.java Signal_pb2.py Signal.pb.cc Signal.pb.h Signal.pbobjc.h Signal.pbobjc.m Signal_pb.rb DESTINATION lib/CanLogSyncServ)
+install(FILES pb_signal.js pb_signals.js CanLogSyncServ/Pb_Signal.php CanLogSyncServ/Pb_Signals.php Signal.cs CanLogSyncServ/Signal.java Signal_pb2.py Signal.pb.cc Signal.pb.h Signal.pbobjc.h Signal.pbobjc.m Signal_pb.rb DESTINATION lib/CanLogSyncServ)
 

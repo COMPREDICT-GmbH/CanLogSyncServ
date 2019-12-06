@@ -5,14 +5,14 @@ cmake_minimum_required (VERSION 3.8)
 
 project("CanLogSyncServ")
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(CMAKE_CXX_STANDARD 17)
 
 if (UNIX)
 	find_package(PkgConfig)
 	pkg_check_modules(PC_ZeroMQ QUIET zmq)
-	pkg_check_modules(PC_VectorDBC QUIET Vector_DBC)
+	pkg_check_modules(dbcppp QUIET dbcppp)
 	find_path(ZeroMQ_INCLUDE_DIR
 			NAMES zmq.hpp
 			PATHS ${PC_ZeroMQ_INCLUDE_DIRS}
@@ -22,16 +22,16 @@ if (UNIX)
 			PATHS ${PC_ZeroMQ_LIBRARY_DIRS}
 			)
 	find_path(VectorDBC_INCLUDE_DIR
-			NAMES Vector/DBC.h
-			PATHS ${PC_VectorDBC_INCLUDE_DIRS}
+			NAMES dbcppp/DBC_Grammar.h
+			PATHS ${PC_dbcppp_INCLUDE_DIRS}
 			)
 	find_library(Vector_DBC_LIBRARY
-			NAMES Vector_DBC
-			PATHS ${PC_VectorDBC_LIBRARY_DIRS}
+			NAMES dbcppp
+			PATHS ${PC_dbcppp_LIBRARY_DIRS}
 			)
 endif ()
 
-find_package(Boost REQUIRED program_options)
+find_package(Boost REQUIRED program_options filesystem)
 find_package(Protobuf REQUIRED)
 
 # Include sub-projects.

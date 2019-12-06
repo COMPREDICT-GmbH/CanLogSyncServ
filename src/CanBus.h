@@ -21,7 +21,7 @@ public:
 
 private:
 	id_t _bus_id;
-	Can _can;
+	mutable Can _can;
 	std::unordered_map<canid_t, std::vector<std::pair<void*, DBCSignal_Wrapper>>> _msgs;
 	mutable std::chrono::microseconds _time;
 };
