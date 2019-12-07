@@ -218,6 +218,6 @@ Not supported yet.
 
 ## Interesting notes
 ### Performance of running multiple instances of the `CanLogSyncServ`
-Since the `CanLogSyncServ` is using CAN filters, which indeed are software based but despite are a huge performance boost, there shouldn't be a noticeable performance impact when running multiple instances of the program.
+Since the `CanLogSyncServ` is using CAN filters, which indeed are software based but despite are a huge performance boost, there shouldn't be a noticeable performance impact when running multiple instances of the program. To be 100% sure here, tests has to be made.
 
 But consider, if the list of signals for the instances is overlapping in some signals, there will be hash-map lookup per overlapping signal more.
