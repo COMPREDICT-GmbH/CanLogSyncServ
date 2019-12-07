@@ -136,30 +136,28 @@ int main(int argc, char** argv)
 		("can_bus", po::value<std::vector<std::string>>()->multitoken()->required(), "list of busids, CAN interfaces and DBC files")
 		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds")
 		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals");
+	auto print_usage =
+		[&desc]()
+		{
+			std::cout << "usage: CanLogSyncServ "
+				"--config=<config_file> "
+				"--can_bus=<<busid>;<iface>;<dbc>>... "
+				"--ipc_link=<ipc_link>... "
+				"[--sample_rate=<sample_rate>] "
+				"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
+				<< std::endl;
+			std::cout << desc << std::endl;
+		};
 	if (argc == 1)
 	{
-		std::cout << "usage: CanLogSyncServ "
-			"--config=<config_file> "
-			"--can_bus=<<busid>;<iface>;<dbc>>... "
-			"--ipc_link=<ipc_link>... "
-			"[--sample_rate=<sample_rate>] "
-			"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
-			<< std::endl;
-		std::cout << desc << std::endl;
+		print_usage();
 		return 0;
 	}
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
-	if (vm.empty() || vm.count("help"))
+	if (vm.count("help"))
 	{
-		std::cout << "usage: CanLogSyncServ "
-			"--config=<config_file> "
-			"--can_bus=<<busid>;<iface>;<dbc>>... "
-			"--ipc_link=<ipc_link>... "
-			"[--sample_rate=<sample_rate>] "
-			"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
-			<< std::endl;
-		std::cout << desc << std::endl;
+		print_usage();
 		return 0;
 	}
 	po::notify(vm);
