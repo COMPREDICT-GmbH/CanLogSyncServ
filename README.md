@@ -157,11 +157,12 @@ There are also many other bindings for other languages to ZeroMQ and protobuf. F
   * [cppzmq](https://github.com/zeromq/cppzmq)
   * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [Boost program_options](https://www.boost.org/)
+  * [Boost filesystem](https://www.boost.org/)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   
 ### Unix
 ```
-git clone https://github.com/xR3b0rn/CanLogSyncServ.git
+git clone https://github.com/COMPREDICT-GmbH/CanLogSyncServ.git
 mkdir CanLogSyncServ/build
 cd CanLogSyncServ/build
 ccmake ..
