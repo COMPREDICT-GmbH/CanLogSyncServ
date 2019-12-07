@@ -124,7 +124,6 @@ void CanSync::worker()
 					}
 				}
 			};
-		pull_data_to_current();
 		auto fire = [this]()
 			{
 				return std::find_if(_can_buses.begin(), _can_buses.end(),
@@ -135,6 +134,7 @@ void CanSync::worker()
 			};
 		while (fire())
 		{
+			pull_data_to_current();
 			std::vector<SubData> sub_data;
 			for (auto& signal_fire_data : _signal_queues)
 			{
@@ -145,7 +145,6 @@ void CanSync::worker()
 				sub->update(_next_fire, sub_data);
 			}
 			_next_fire += _sample_rate;
-			pull_data_to_current();
 		}
 	}
 }
