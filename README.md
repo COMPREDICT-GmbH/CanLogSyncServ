@@ -1,5 +1,5 @@
 # CanLogSyncServ
-`CanLogSyncServ` is a small and lightweight tool for providing aa easy accessable interface to DBC CAN signals by an user defined
+`CanLogSyncServ` is a small and lightweight tool for providing an easy accessable interface to DBC CAN signals by an user defined
 signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool is optimized for performance.
 
 
