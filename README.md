@@ -161,7 +161,7 @@ There are also many other bindings for other languages to ZeroMQ and protobuf. F
   
 ### Unix
 ```
-git clone https://github.com/xR3b0rn/CanLogSyncServ.git
+git clone https://github.com/COMPREDICT-GmbH/CanLogSyncServ.git
 mkdir CanLogSyncServ/build
 cd CanLogSyncServ/build
 ccmake ..
