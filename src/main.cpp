@@ -1,11 +1,15 @@
 
+#include <signal.h>
+
 #include <zmq.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <atomic>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <condition_variable>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <dbcppp/Network.h>
@@ -17,6 +21,18 @@
 #include "CanBus.h"
 #include "ZmqServer.h"
 
+std::atomic<bool> g_running;
+void term(int signum)
+{
+	g_running = false;
+}
+void install_SIGTERM_handler()
+{
+	struct sigaction action;
+	std::memset(&action, 0, sizeof(struct sigaction));
+	action.sa_handler = term;
+	::sigaction(SIGTERM, &action, NULL);
+}
 static void insert_msgs_into_canbuses(
 		std::vector<CanBus>& can_buses,
 		const std::vector<ConfigParserSignal::CfgSignal>& cfg_sigs,
@@ -89,7 +105,14 @@ static void insert_msgs_into_canbuses(
 		can_buses.emplace_back(0, std::move(can), std::move(msgs));
 	}
 	std::vector<ConfigParserSignal::CfgSignal> delta;
-	std::set_difference(cfg_sigs.begin(), cfg_sigs.end(), del_list.begin(), del_list.end(), std::back_inserter(delta), [](const auto& lhs, const auto& rhs) { return lhs.canid < rhs.canid && lhs.signal_name < rhs.signal_name; });
+	std::set_difference(
+		cfg_sigs.begin(), cfg_sigs.end(),
+		del_list.begin(), del_list.end(),
+		std::back_inserter(delta),
+		[](const auto& lhs, const auto& rhs)
+		{
+			return lhs.canid < rhs.canid && lhs.signal_name < rhs.signal_name;
+		});
 	if (delta.size())
 	{
 		throw std::runtime_error("Couldn't find signal with canid=" + std::to_string(delta[0].canid) + " and signal_name="  + delta[0].signal_name);
@@ -99,6 +122,8 @@ static void insert_msgs_into_canbuses(
 
 int main(int argc, char** argv)
 {
+	install_SIGTERM_handler();
+
 	namespace po = boost::program_options;
 	po::options_description desc;
 	desc.add_options()
@@ -108,9 +133,9 @@ int main(int argc, char** argv)
 			"List of IPC links. E.g. ipc:///tmp/weather.ipc or tcp://*:5556, "
 			"for a exhaustive list of supported protocols, please go to http://wiki.zeromq.org/docs:features "
 			"under the Protocols section.")
-		("can_bus", po::value<std::vector<std::string>>()->multitoken()->required(), "list of CAN interfaces")
+		("can_bus", po::value<std::vector<std::string>>()->multitoken()->required(), "list of busids, CAN interfaces and DBC files")
 		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds")
-		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals to log");
+		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals");
 
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -118,20 +143,20 @@ int main(int argc, char** argv)
 	{
 		std::cout << "usage: CanLogSyncServ "
 			"--config=<config_file> "
-			"--can_bus=<busid>;<iface>;<dbc>... "
+			"--can_bus=<<busid>;<iface>;<dbc>>... "
 			"--ipc_link=<ipc_link>... "
 			"[--sample_rate=<sample_rate>] "
-			"[--signal...]"
+			"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
 			<< std::endl;
 		std::cout << desc << std::endl;
 		return 0;
 	}
 	po::notify(vm);
-	const auto& config_file_path = vm["config"].as<std::string>();
-	const auto& ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
-	const auto& cmd_can_buses    = vm["can_bus"].as<std::vector<std::string>>();
-	const auto& sample_rate      = vm["sample_rate"].as<uint64_t>();
-	const auto& cmd_signals      = vm["signal"];
+	const auto config_file_path = vm["config"].as<std::string>();
+	const auto ipc_links        = vm["ipc_link"].as<std::vector<std::string>>();
+	const auto cmd_can_buses    = vm["can_bus"].as<std::vector<std::string>>();
+	const auto sample_rate      = vm["sample_rate"].as<uint64_t>();
+	const auto cmd_signals      = vm["signal"];
     
 	std::vector<CanBus> can_buses;
 	{
@@ -187,9 +212,10 @@ int main(int argc, char** argv)
 	}
 	can_sync.start();
 
-	while (can_sync.running())
+	g_running = true;
+	while (g_running)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 	return 0;
 }
