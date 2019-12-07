@@ -8,6 +8,34 @@ The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern in combination
 
 For this reason the ZeroMQ and protobuf libraries are needed to receive data from the IPC sockets.
 
+## Options
+  * `--help`
+     
+     produces help message
+  * `--config`
+     
+     With `--config` a config file can be specifed, this option is optional. The syntax of the config file is like the syntax for the `--signal` command (for more details about the signal syntax look at `--signal`). Each signal means a new line. No extra characters are allowed. If `CanLogSyncServ` finds e.g. a white space, `CanLogSyncServ` wont parse this line and throws an error instead.
+     
+     A config file can look like this:
+     ```
+     0;1;Sig_0;0
+     0;2;Sig_1;1
+     0;3;Sig_0;2
+     0;3;Sig_2;3
+     ```
+  * `--ipc_link`
+  
+     with `--ipc_link` multiple IPC links can be specified, at least one is required. For the syntax of the IPC links and an exhaustive list of supported IPC links, please go to http://wiki.zeromq.org/docs.
+  * `--can_bus`
+  
+     with `--can_bus` multiple CAN buses can be specified, at least on is required. The syntax of `--can_bus` is as follows: `--can_bus=<busid>;<iface>;<dbc>`. `<busid>` refers to the id specified with the `--signal` option or the signals in the config-file. This means `CanLogSyncServ` will only log signals with the busid from the iface with the same bus id. `<iface>` specifys the iface name the `CanLogSyncServ` shall log from. `<dbc>` specifies the DBC file describing the connected CAN bus.
+  * `--sample_rate`
+  
+     With `--sample_rate` the sample rate of the `CanLogSyncServ` can be specified. The unit is microseconds and the default value is 5000.
+  * `--signal`
+  
+     With `--signal` multiple signals can be specified, this option is optional. The syntax of `--signal` is as follows: `--signal=<busid>;<canid>;<signal_name>;<signal_id>`. `<busid>` refers to the with `--can_bus` specified `<busid>` (for more details about `<busid>` look at `--can_bus`). `<canid>` refers to the CAN frame ID from the DBC specified refered by the `<busid>`. `<signal_name>` refers to the signal name in the message. `<signal_id>` defines a signal ID for this signal. The signal ID must be unique in the whole config-file and in every additionally signal specified with `--signal`, elsewise `CanLogSyncServ` will throw an error. The `<signal_id>` can latter be used by another application to identify the received signal.
+     
 ## Example usage
 Say this DBC is given:
 
@@ -70,7 +98,6 @@ or by creating a config file that we can pass to the `CanLogSyncServ`-server:
 
 config.cfg:
 ```
-# Bus ID;Message ID;Signal Name;Signal ID
 0;1;Sig_0;0
 0;2;Sig_1;1
 0;3;Sig_0;2
