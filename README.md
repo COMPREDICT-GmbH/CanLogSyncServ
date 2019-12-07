@@ -133,7 +133,7 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 Now we can subscribe to those IPC sockets like this:
 
 C++
-```
+```C++
 #include <zmq.hpp>
 #include <iostream>
 #include <sstream>
@@ -176,7 +176,7 @@ int main (int argc, char *argv[])
 }
 ```
 or the python3 way:
-```
+```python
 import zmq
 import Signal_pb2
 
