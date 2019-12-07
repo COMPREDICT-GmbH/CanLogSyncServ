@@ -153,6 +153,7 @@ while True:
 There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf). To use the `CanLogSyncServ`, your wished language has to be supported by both libraries (ZeroMQ and protobuf).
 ## Help Message
 ```
+> CanLogSyncServ --help
 usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>... --ipc_link=<ipc_link>... [--sample_rate=<sample_rate>] [--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]
   --help                    produce help message
   --config arg              config file
