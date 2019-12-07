@@ -39,7 +39,7 @@ usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>..
      ```
   * `--ipc_link`
   
-     with `--ipc_link` multiple IPC links can be specified, at least one is required. For the syntax of the IPC links and an exhaustive list of supported IPC protocols, please go to http://wiki.zeromq.org/docs.
+     with `--ipc_link` multiple IPC links can be specified, at least one is required. For the syntax of the IPC links and an exhaustive list of supported IPC protocols, please go to http://wiki.zeromq.org/community.
   * `--can_bus`
   
      with `--can_bus` multiple CAN buses can be specified, at least on is required. The syntax of `--can_bus` is as follows: `--can_bus=<busid>;<iface>;<dbc>`. `<busid>` refers to the ID specified with the `--signal` option or the `<busid>` refered by a signal in the config-file. This means `CanLogSyncServ` will only log signals with the `<busid>` from the `<iface>` with the same `<busid>`. `<iface>` specifys the interface name the `CanLogSyncServ` shall log from. `<dbc>` specifies the DBC file describing the connected CAN bus.
