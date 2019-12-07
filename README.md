@@ -167,12 +167,12 @@ usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>..
 ```
 ## Build
 ### Dependencies
-  * [libzmq](https://github.com/zeromq/libzmq)
-  * [cppzmq](https://github.com/zeromq/cppzmq)
-  * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [Boost program_options](https://www.boost.org/)
   * [Boost filesystem](https://www.boost.org/)
+  * [cppzmq](https://github.com/zeromq/cppzmq)
+  * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
+  * [libzmq](https://github.com/zeromq/libzmq)
   
 ### Unix
 ```
