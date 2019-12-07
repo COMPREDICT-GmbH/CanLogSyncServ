@@ -42,7 +42,7 @@ usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>..
      with `--ipc_link` multiple IPC links can be specified, at least one is required. For the syntax of the IPC links and an exhaustive list of supported IPC links, please go to http://wiki.zeromq.org/docs.
   * `--can_bus`
   
-     with `--can_bus` multiple CAN buses can be specified, at least on is required. The syntax of `--can_bus` is as follows: `--can_bus=<busid>;<iface>;<dbc>`. `<busid>` refers to the id specified with the `--signal` option or the signals in the config-file. This means `CanLogSyncServ` will only log signals with the busid from the iface with the same bus id. `<iface>` specifys the iface name the `CanLogSyncServ` shall log from. `<dbc>` specifies the DBC file describing the connected CAN bus.
+     with `--can_bus` multiple CAN buses can be specified, at least on is required. The syntax of `--can_bus` is as follows: `--can_bus=<busid>;<iface>;<dbc>`. `<busid>` refers to the ID specified with the `--signal` option or the `<busid>` refered by a signal in the config-file. This means `CanLogSyncServ` will only log signals with the `<busid>` from the `<iface>` with the same `<busid>`. `<iface>` specifys the interface name the `CanLogSyncServ` shall log from. `<dbc>` specifies the DBC file describing the connected CAN bus.
   * `--sample_rate`
   
      With `--sample_rate` the sample rate of the `CanLogSyncServ` can be specified. The unit is microseconds and the default value is 5000.
