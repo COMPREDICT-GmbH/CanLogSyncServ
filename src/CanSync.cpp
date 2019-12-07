@@ -3,8 +3,8 @@
 #include <assert.h>
 #include "CanSync.h"
 
-CanSync::CanSync(std::chrono::microseconds sr, std::vector<CanBus>&& can_buses)
-	: _sr{sr}
+CanSync::CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses)
+	: _sample_rate{sample_rate}
 	, _running{false}
 	, _can_buses{std::move(can_buses)}
 {
@@ -31,16 +31,25 @@ void CanSync::start()
 				signal_fire_data.current.id = cs_id.second;
 				signal_fire_data.current.value = 0.;
 				_signal_queues.push_back(signal_fire_data);
-				void* user_data = (void*)&_signal_queues.back();
+				void* user_data = reinterpret_cast<void*>(&_signal_queues.back());
 				can_bus.set_user_data(cs_id.first, cs_id.second, user_data);
 			}
 		}
-		_next_fire = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()) + _sr;
+		_next_fire = std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::system_clock::now().time_since_epoch()) + _sample_rate;
 		_running = true;
-		_th_worker = std::thread{[this]() { this->worker(); }};
+		_th_worker = std::thread{
+			[this]()
+			{
+				this->worker();
+			}};
 		for (const auto& can_bus : _can_buses)
 		{
-			_ths_can_read.emplace_back([this, &can_bus]() { this->worker_can_read(can_bus); });
+			_ths_can_read.emplace_back(
+				[this, &can_bus]()
+				{
+					this->worker_can_read(can_bus);
+				});
 		}
 	}
 }
@@ -77,59 +86,34 @@ void CanSync::worker()
 			return (timestamp - _next_fire).count() < 0;
 		};
 
-	std::vector<Signal> signals;
 	while (_running)
 	{
-		signals.clear();
 		{
-			// poll data
+			// enter critical section and poll data until no data left
 			unique_lock_t lock{_mx_signal_data_queue};
-			bool new_data = _cond_var_frame_recv.wait_for(lock, std::chrono::milliseconds{100}, [this]() { return _signal_data_queue.size() > 0; });
+			bool new_data = _cond_var_frame_recv.wait_for(
+				lock, std::chrono::milliseconds{100},
+				[this]()
+				{
+					return _signal_data_queue.size() > 0;
+				});
 			if (new_data)
 			{
 				while (_signal_data_queue.size())
 				{
-					signals.push_back(_signal_data_queue.front());
+					SignalFireData* signal_fire_data =
+						reinterpret_cast<SignalFireData*>(_signal_data_queue.front().user_data);
+					if (signal_fire_data)
+					{
+						signal_fire_data->signal_queue.push(_signal_data_queue.front());
+					}
 					_signal_data_queue.pop();
 				}
 			}
 		}
-		if (signals.size())
-		{
-			// push data from the queue to the current data slot if the data from the queue is in the given time interval
-			for (const auto& signal : signals)
+		auto pull_data_to_current = [this, in_interval]()
 			{
-				SignalFireData* signal_fire_data = (SignalFireData*)signal.user_data;
-				if (signal_fire_data)
-				{
-					signal_fire_data->signal_queue.push(signal);
-					while (signal_fire_data->signal_queue.size() &&
-						in_interval(signal_fire_data->signal_queue.front().timestamp))
-					{
-						signal_fire_data->current.id = signal_fire_data->signal_queue.front().id;
-						signal_fire_data->current.value = signal_fire_data->signal_queue.front().value;
-						signal_fire_data->signal_queue.pop();
-					}
-				}
-			}
-			// broadcast current data to all subscriber functions until no actual data is left
-			while (std::find_if(_signal_queues.begin(), _signal_queues.end(),
-				[&](const auto& signal_fire_data)
-				{
-					return signal_fire_data.signal_queue.size() == 0;
-				}) == _signal_queues.end())
-			{
-				std::vector<SubData> sub_data;
-				for (auto& signal_fire_data : _signal_queues)
-				{
-					sub_data.push_back(signal_fire_data.current);
-				}
-				for (auto& sub : _subscribers)
-				{
-					sub->update(_next_fire, sub_data);
-				}
-				_next_fire += _sr;
-				for (auto& signal_fire_data : _signal_queues)
+				for (SignalFireData& signal_fire_data : _signal_queues)
 				{
 					while (signal_fire_data.signal_queue.size() &&
 						in_interval(signal_fire_data.signal_queue.front().timestamp))
@@ -139,7 +123,29 @@ void CanSync::worker()
 						signal_fire_data.signal_queue.pop();
 					}
 				}
+			};
+		pull_data_to_current();
+		auto fire = [this]()
+			{
+				return std::find_if(_can_buses.begin(), _can_buses.end(),
+					[this](const CanBus& bus)
+					{
+						return bus.time() < _next_fire;
+					}) == _can_buses.end();
+			};
+		while (fire())
+		{
+			std::vector<SubData> sub_data;
+			for (auto& signal_fire_data : _signal_queues)
+			{
+				sub_data.push_back(signal_fire_data.current);
 			}
+			for (auto& sub : _subscribers)
+			{
+				sub->update(_next_fire, sub_data);
+			}
+			_next_fire += _sample_rate;
+			pull_data_to_current();
 		}
 	}
 }

@@ -33,7 +33,7 @@ public:
 
 	using unique_lock_t = std::unique_lock<std::mutex>;
 
-	CanSync(std::chrono::microseconds sr, std::vector<CanBus>&& can_buses);
+	CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses);
 	~CanSync();
 	bool running() const;
 	void start();
@@ -45,7 +45,7 @@ private:
 	void worker_can_read(const CanBus& can_bus);
 	
 	// sampling rate
-	std::chrono::microseconds _sr;
+	std::chrono::microseconds _sample_rate;
 	std::chrono::microseconds _next_fire;
 	std::atomic<bool> _running;
 	std::vector<std::unique_ptr<Subscriber>> _subscribers;

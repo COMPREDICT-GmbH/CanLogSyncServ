@@ -15,7 +15,6 @@ ZmqServer::ZmqServer(const std::vector<std::string>& ipc_links)
 }
 ZmqServer::~ZmqServer()
 {
-	std::cout << "test" << std::endl;
 }
 void ZmqServer::cb_sub(std::chrono::microseconds timestamp, const std::vector<CanSync::SubData>& sub_data)
 {

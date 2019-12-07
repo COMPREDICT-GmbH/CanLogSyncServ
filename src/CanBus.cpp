@@ -16,13 +16,20 @@ CanBus::CanBus(id_t bus_id, Can&& can, const std::vector<std::pair<canid_t, std:
 		_msgs.insert(std::make_pair(msg.first, std::move(wrappers)));
 	}
 }
+CanBus::CanBus(CanBus&& other)
+	: _bus_id{other._bus_id}
+	, _can{std::move(other._can)}
+	, _msgs{std::move(other._msgs)}
+	, _time{other._time.load()}
+{
+}
 std::vector<Signal> CanBus::recv(std::chrono::microseconds timeout) const
 {
 	std::vector<Signal> result;
 	auto frame = _can.recv(timeout);
 	if (frame)
 	{
-		_time = frame->timestamp;
+		_time = std::chrono::duration_cast<std::chrono::microseconds>(frame->timestamp).count();
 		auto iter_signals = _msgs.find(frame->raw_frame.can_id);
 		if (iter_signals != _msgs.end())
 		{
@@ -99,5 +106,5 @@ std::vector<std::pair<canid_t, Signal::id_t>> CanBus::canids_and_signal_ids() co
 }
 std::chrono::microseconds CanBus::time() const
 {
-	return _time;
+	return std::chrono::microseconds{_time.load()};
 }
