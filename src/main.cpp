@@ -66,9 +66,9 @@ static void insert_msgs_into_canbuses(
 			std::shared_ptr<dbcppp::Signal> mux_sig;
 			auto sig_mux_iter = std::find_if(msg->second->signals.begin(), msg->second->signals.end(),
 				[](const auto& sig)
-			{
-				return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
-			});
+				{
+					return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
+				});
 			if (sig_mux_iter != msg->second->signals.end())
 			{
 				mux_sig = sig_mux_iter->second;
@@ -76,11 +76,12 @@ static void insert_msgs_into_canbuses(
 			auto sig = msg->second->signals.find(cfg_sig.signal_name);
 			if (sig == msg->second->signals.end())
 			{
-				throw std::runtime_error{ "Couldn't find signal with canid=" + std::to_string(cfg_sig.canid) + " and signal_name=" + cfg_sig.signal_name + " in the given DBC!"};
+				throw std::runtime_error{"Couldn't find signal with canid=" + std::to_string(cfg_sig.canid) + " and signal_name=" + cfg_sig.signal_name + " in the given DBC!"};
 			}
+			auto dbc_sig = sig->second;
 			DBCSignal_Wrapper sig_wrapper;
 			sig_wrapper.id = cfg_sig.signal_id;
-			sig_wrapper.dbc_signal = sig->second;
+			sig_wrapper.dbc_signal = dbc_sig;
 			// if there is no mux_sig, mux_sig will be nullptr
 			sig_wrapper.dbc_mux_signal = mux_sig;
 			map_wrappers[cfg_sig.canid].push_back(sig_wrapper);

@@ -21,10 +21,16 @@ void CanSync::start()
 {
 	if (!_running)
 	{
+		std::size_t num_signals = 0;
 		for (auto& can_bus : _can_buses)
 		{
 			const auto& canids_and_signal_ids = can_bus.canids_and_signal_ids();
-			_signal_queues.reserve(canids_and_signal_ids.size());
+			num_signals += canids_and_signal_ids.size();
+		}
+		_signal_queues.reserve(num_signals);
+		for (auto& can_bus : _can_buses)
+		{
+			const auto& canids_and_signal_ids = can_bus.canids_and_signal_ids();
 			for (const auto& cs_id : canids_and_signal_ids)
 			{
 				SignalFireData signal_fire_data;
@@ -81,11 +87,11 @@ void CanSync::subscribe(std::unique_ptr<CanSync::Subscriber>&& sub)
 }
 void CanSync::worker()
 {
-	auto in_interval = [this](std::chrono::microseconds timestamp)
-		{
-			return (timestamp - _next_fire).count() < 0;
-		};
-
+	std::unordered_map<uint64_t, std::chrono::microseconds> bus_times;
+	for (const auto& bus : _can_buses)
+	{
+		bus_times[bus.id()] = _next_fire - _sample_rate;
+	}
 	while (_running)
 	{
 		{
@@ -101,36 +107,50 @@ void CanSync::worker()
 			{
 				while (_signal_data_queue.size())
 				{
+					Signal& signal_data = _signal_data_queue.front();
 					SignalFireData* signal_fire_data =
-						reinterpret_cast<SignalFireData*>(_signal_data_queue.front().user_data);
+						reinterpret_cast<SignalFireData*>(signal_data.user_data);
 					if (signal_fire_data)
 					{
-						signal_fire_data->signal_queue.push(_signal_data_queue.front());
+						auto& signal_queue = signal_fire_data->signal_queue;
+						signal_queue.push(signal_data);
 					}
+					bus_times[signal_data.bus_id] = signal_data.timestamp;
 					_signal_data_queue.pop();
 				}
 			}
 		}
-		auto pull_data_to_current = [this, in_interval]()
+		auto pull_data_to_current =
+			[this]()
 			{
+				auto in_interval =
+					[this](std::chrono::microseconds timestamp)
+					{
+						return (timestamp - _next_fire).count() < 0;
+					};
 				for (SignalFireData& signal_fire_data : _signal_queues)
 				{
 					while (signal_fire_data.signal_queue.size() &&
 						in_interval(signal_fire_data.signal_queue.front().timestamp))
 					{
-						signal_fire_data.current.id = signal_fire_data.signal_queue.front().id;
-						signal_fire_data.current.value = signal_fire_data.signal_queue.front().value;
+						const auto& sig = signal_fire_data.signal_queue.front();
+						signal_fire_data.current.id = sig.id;
+						signal_fire_data.current.value = sig.value;
 						signal_fire_data.signal_queue.pop();
 					}
 				}
 			};
-		auto fire = [this]()
+		auto fire =
+			[this, &bus_times]()
 			{
-				return std::find_if(_can_buses.begin(), _can_buses.end(),
-					[this](const CanBus& bus)
+				for (const auto& bus_time : bus_times)
+				{
+					if (bus_time.second < _next_fire)
 					{
-						return bus.time() < _next_fire;
-					}) == _can_buses.end();
+						return false;
+					}
+				}
+				return true;
 			};
 		while (fire())
 		{

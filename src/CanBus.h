@@ -21,6 +21,7 @@ public:
 	void* get_and_unset_user_data(canid_t canid, Signal::id_t signal_id);
 	std::vector<std::pair<canid_t, Signal::id_t>> canids_and_signal_ids() const;
 	std::chrono::microseconds time() const;
+	id_t id() const;
 
 private:
 	id_t _bus_id;

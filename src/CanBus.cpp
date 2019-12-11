@@ -34,15 +34,15 @@ std::vector<Signal> CanBus::recv(std::chrono::microseconds timeout) const
 		if (iter_signals != _msgs.end())
 		{
 			const auto& raw = frame->raw_frame;
-			uint64_t data =
-					(uint64_t)raw.data[0] | ((uint64_t)raw.data[1] << 8) | ((uint64_t)raw.data[2] << 16)
-				| ((uint64_t)raw.data[3] << 24) | ((uint64_t)raw.data[4] << 32) | ((uint64_t)raw.data[5] << 40)
-				| ((uint64_t)raw.data[6] << 48) | ((uint64_t)raw.data[7] << 56);
+			//uint64_t data =
+			//	*((uint64_t*)&raw.data[0]) | (*((uint64_t*)&raw.data[1]) << 8) | (*((uint64_t*)&raw.data[2]) << 16)
+			//	| (*((uint64_t*)&raw.data[3]) << 24) | (*((uint64_t*)&raw.data[4]) << 32) | (*((uint64_t*)&raw.data[5]) << 40)
+			//	| (*((uint64_t*)&raw.data[6]) << 48) | (*((uint64_t*)&raw.data[7]) << 56);
+			uint64_t data = *((uint64_t*)&raw.data[0]);
 			for (const auto& signal : iter_signals->second)
 			{
 				auto& dbc_sig = signal.second.dbc_signal;
 				auto& dbc_mux_sig = signal.second.dbc_mux_signal;
-				
 				Signal sig;
 				sig.id = signal.second.id;
 				if (dbc_sig->multiplexer_indicator != dbcppp::Signal::Multiplexer::MuxValue ||
@@ -107,4 +107,8 @@ std::vector<std::pair<canid_t, Signal::id_t>> CanBus::canids_and_signal_ids() co
 std::chrono::microseconds CanBus::time() const
 {
 	return std::chrono::microseconds{_time.load()};
+}
+CanBus::id_t CanBus::id() const
+{
+	return _bus_id;
 }
