@@ -39,7 +39,6 @@ static void insert_msgs_into_canbuses(
 		const std::vector<ConfigParserCanBus::CfgCanBus>& cfg_can_buses
 	)
 {
-	std::vector<ConfigParserSignal::CfgSignal> del_list;
 	for (const ConfigParserCanBus::CfgCanBus& cfg_can_bus : cfg_can_buses)
 	{
 		dbcppp::Network network;
@@ -54,46 +53,43 @@ static void insert_msgs_into_canbuses(
 				throw std::runtime_error("couldn't parse dbc file \"" + cfg_can_bus.dbc_file_path + "\"");
 			}
 		}
-		std::vector<std::pair<canid_t, std::vector<DBCSignal_Wrapper>>> msgs;
-		for (const auto& msg : network.messages)
+		std::map<uint64_t, std::vector<DBCSignal_Wrapper>> map_wrappers;
+		for (const auto& cfg_sig : cfg_sigs)
 		{
-			std::vector<DBCSignal_Wrapper> wrappers;
+			if (cfg_sig.busid != cfg_can_bus.busid) continue;
+			auto msg = network.messages.find(cfg_sig.canid);
+			if (msg == network.messages.end())
+			{
+				throw std::runtime_error{"Couldn't find message with canid=" + std::to_string(cfg_sig.canid) + " in the given DBC!"};
+			}
+			// find mux_sig if present
 			std::shared_ptr<dbcppp::Signal> mux_sig;
-			auto sig_mux_iter = std::find_if(msg.second->signals.begin(), msg.second->signals.end(),
+			auto sig_mux_iter = std::find_if(msg->second->signals.begin(), msg->second->signals.end(),
 				[](const auto& sig)
-				{
-					return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
-				});
-			if (sig_mux_iter != msg.second->signals.end())
+			{
+				return sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxSwitch;
+			});
+			if (sig_mux_iter != msg->second->signals.end())
 			{
 				mux_sig = sig_mux_iter->second;
 			}
-			for (const auto& sig : msg.second->signals)
+			auto sig = msg->second->signals.find(cfg_sig.signal_name);
+			if (sig == msg->second->signals.end())
 			{
-				auto iter = std::find_if(cfg_sigs.begin(), cfg_sigs.end(),
-					[&](const ConfigParserSignal::CfgSignal& cfg_sig)
-					{
-						return cfg_sig.busid == cfg_can_bus.busid && cfg_sig.canid == msg.first
-							&& sig.second->name == cfg_sig.signal_name;
-					});
-				if (iter != cfg_sigs.end())
-				{
-					DBCSignal_Wrapper sig_wrapper;
-					sig_wrapper.id = iter->signal_id;
-					sig_wrapper.dbc_signal = sig.second;
-					if (sig.second->multiplexer_indicator == dbcppp::Signal::Multiplexer::MuxValue)
-					{
-						sig_wrapper.dbc_mux_signal = mux_sig;
-					}
-					wrappers.push_back(sig_wrapper);
-					std::cout << "Added Signal: " << msg.second->name << "::" << sig.second->name << std::endl;
-					del_list.push_back(*iter);
-				}
+				throw std::runtime_error{ "Couldn't find signal with canid=" + std::to_string(cfg_sig.canid) + " and signal_name=" + cfg_sig.signal_name + " in the given DBC!"};
 			}
-			if (wrappers.size())
-			{
-				msgs.push_back(std::make_pair(msg.second->id, std::move(wrappers)));
-			}
+			DBCSignal_Wrapper sig_wrapper;
+			sig_wrapper.id = cfg_sig.signal_id;
+			sig_wrapper.dbc_signal = sig->second;
+			// if there is no mux_sig, mux_sig will be nullptr
+			sig_wrapper.dbc_mux_signal = mux_sig;
+			map_wrappers[cfg_sig.canid].push_back(sig_wrapper);
+			std::cout << "Added Signal: " << msg->second->name << "::" << sig->second->name << std::endl;
+		}
+		std::vector<std::pair<canid_t, std::vector<DBCSignal_Wrapper>>> msgs;
+		for (const auto& wrappers : map_wrappers)
+		{
+			msgs.push_back(wrappers);
 		}
 		std::vector<canid_t> filter_ids;
 		for (const auto& msg : msgs)
@@ -104,20 +100,6 @@ static void insert_msgs_into_canbuses(
 		can.set_filters(filter_ids);
 		can_buses.emplace_back(0, std::move(can), std::move(msgs));
 	}
-	std::vector<ConfigParserSignal::CfgSignal> delta;
-	std::set_difference(
-		cfg_sigs.begin(), cfg_sigs.end(),
-		del_list.begin(), del_list.end(),
-		std::back_inserter(delta),
-		[](const auto& lhs, const auto& rhs)
-		{
-			return lhs.canid < rhs.canid && lhs.signal_name < rhs.signal_name;
-		});
-	if (delta.size())
-	{
-		throw std::runtime_error("Couldn't find signal with canid=" + std::to_string(delta[0].canid) + " and signal_name="  + delta[0].signal_name);
-	}
-
 }
 
 int main(int argc, char** argv)
