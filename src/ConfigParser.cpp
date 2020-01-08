@@ -9,8 +9,8 @@ ConfigParserCanBus::ConfigParserCanBus(const std::vector<std::string>& cmd_can_b
 			std::istringstream iss(line);
 			std::string busid, iface, dbc_file_path;
 			// just skip incorrect lines
-			if (!std::getline(iss, busid, ';'))       return false;
-			if (!std::getline(iss, iface, ';'))       return false;
+			if (!std::getline(iss, busid, ','))       return false;
+			if (!std::getline(iss, iface, ','))       return false;
 			if (!std::getline(iss, dbc_file_path))    return false;
 			CfgCanBus can_bus;
 			can_bus.busid = std::atoi(busid.c_str());
@@ -39,9 +39,9 @@ ConfigParserSignal::ConfigParserSignal(const std::vector<std::string>& cmd_signa
 			std::istringstream iss(line);
 			std::string busid, canid, signal_name, signal_id;
 			// just skip incorrect lines
-			if (!std::getline(iss, busid, ';'))       return false;
-			if (!std::getline(iss, canid, ';'))       return false;
-			if (!std::getline(iss, signal_name, ';')) return false;
+			if (!std::getline(iss, busid, ','))       return false;
+			if (!std::getline(iss, canid, ','))       return false;
+			if (!std::getline(iss, signal_name, ',')) return false;
 			if (!std::getline(iss, signal_id))        return false;
 			CfgSignal sig;
 			sig.busid = std::atoi(busid.c_str());
