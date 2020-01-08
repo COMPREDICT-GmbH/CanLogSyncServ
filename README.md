@@ -11,7 +11,7 @@ For this reason the ZeroMQ and protobuf libraries are needed to receive data fro
 ## Help Message
 ```
 > CanLogSyncServ --help
-usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>... --ipc_link=<ipc_link>... [--sample_rate=<sample_rate>] [--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]
+usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>,<iface>,<dbc>>... --ipc_link=<ipc_link>... [--sample_rate=<sample_rate>] [--signal=<<busid,<canid>,<signal_name>,<signal_id>>...]
   --help                    produce help message
   --config arg              config file
   --ipc_link arg            List of IPC links. E.g. ipc:///tmp/weather.ipc or
@@ -32,10 +32,10 @@ usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>;<iface>;<dbc>>..
      
      A config file can look like this:
      ```
-     0;1;Sig_0;0
-     0;2;Sig_1;1
-     0;3;Sig_0;2
-     0;3;Sig_2;3
+     0,1,Sig_0,0
+     0,2,Sig_1,1
+     0,3,Sig_0,2
+     0,3,Sig_2,3
      ```
   * `--ipc_link`
   
