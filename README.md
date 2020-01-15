@@ -108,7 +108,7 @@ And we want log Msg_0::Sig_0, Msg_1::Sig_1, Msg_2::Sig_0, Msg_2::Sig_2.
 
 Therefor we either can start the `CanLogSyncServ`-server by specifiying the signals in the command line:
 ```
-CanLogSyncServ --can_bus="0;vcan0;network.dbc" --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --signal="0,1,Sig_0,0" "0,2,Sig_1,1" "0,3,Sig_0,2" "0,3,Sig_2,3"
+CanLogSyncServ --can_bus="0,vcan0,network.dbc" --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --signal="0,1,Sig_0,0" "0,2,Sig_1,1" "0,3,Sig_0,2" "0,3,Sig_2,3"
 ```
 or by creating a config file that we can pass to the `CanLogSyncServ`-server:
 
