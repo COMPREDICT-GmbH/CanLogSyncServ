@@ -50,7 +50,7 @@ usage: CanLogSyncServ --config=<config_file> --can_bus=<<busid>,<iface>,<dbc>>..
      > And because this is the best time accuracity we can get on a non RTOS, you always should rely on the fact that everytime you receive something from the `CanLogSyncServ` over your IPC link it's the most recent data in this time interval. You shouldn't try to program your own timing functions based on timers or something like that. If you need two different `<sample_rate>`s, I recommend to either start two instances of the `CanLogSyncServ` or use something like a reversed PWM.
   * `--signal`
   
-     With `--signal` multiple signals can be specified, this option is optional. The syntax of `--signal` is as follows: `--signal=<busid>;<canid>;<signal_name>;<signal_id>`. `<busid>` refers to the with `--can_bus` specified `<busid>` (for more details about `<busid>` look at `--can_bus`). `<canid>` refers to the CAN frame ID from the DBC refered by one of the `--can_bus`-options. `<signal_name>` refers to the signal name in the message. `<signal_id>` defines a signal ID for this signal. The signal ID must be unique in the whole config-file and in every additionally signal specified with `--signal`, elsewise `CanLogSyncServ` will throw an error. The `<signal_id>` can later be used by another application to identify the received signal.
+     With `--signal` multiple signals can be specified, this option is optional. The syntax of `--signal` is as follows: `--signal=<busid>,<canid>,<signal_name>,<signal_id>`. `<busid>` refers to the with `--can_bus` specified `<busid>` (for more details about `<busid>` look at `--can_bus`). `<canid>` refers to the CAN frame ID from the DBC refered by one of the `--can_bus`-options. `<signal_name>` refers to the signal name in the message. `<signal_id>` defines a signal ID for this signal. The signal ID must be unique in the whole config-file and in every additionally signal specified with `--signal`, elsewise `CanLogSyncServ` will throw an error. The `<signal_id>` can later be used by another application to identify the received signal.
      
 ## Example usage
 Say this DBC is given:
@@ -108,16 +108,16 @@ And we want log Msg_0::Sig_0, Msg_1::Sig_1, Msg_2::Sig_0, Msg_2::Sig_2.
 
 Therefor we either can start the `CanLogSyncServ`-server by specifiying the signals in the command line:
 ```
-CanLogSyncServ --can_bus="0;vcan0;network.dbc" --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --signal="0;1;Sig_0;0" "0;2;Sig_1;1" "0;3;Sig_0;2" "0;3;Sig_2;3"
+CanLogSyncServ --can_bus="0;vcan0;network.dbc" --sample_rate=5000 --ipc_link=ipc:///tmp/network.ipc --ipc_link=tcp://*:5556 --signal="0,1,Sig_0,0" "0,2,Sig_1,1" "0,3,Sig_0,2" "0,3,Sig_2,3"
 ```
 or by creating a config file that we can pass to the `CanLogSyncServ`-server:
 
 config.cfg:
 ```
-0;1;Sig_0;0
-0;2;Sig_1;1
-0;3;Sig_0;2
-0;3;Sig_2;3
+0,1,Sig_0,0
+0,2,Sig_1,1
+0,3,Sig_0,2
+0,3,Sig_2,3
 ```
 And run:
 ```
