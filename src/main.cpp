@@ -124,10 +124,10 @@ int main(int argc, char** argv)
 		{
 			std::cout << "usage: CanLogSyncServ "
 				"--config=<config_file> "
-				"--can_bus=<<busid>;<iface>;<dbc>>... "
+				"--can_bus=<<busid>,<iface>,<dbc>>... "
 				"--ipc_link=<ipc_link>... "
 				"[--sample_rate=<sample_rate>] "
-				"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
+				"[--signal=<<busid,<canid>,<signal_name>,<signal_id>>...]"
 				<< std::endl;
 			std::cout << desc << std::endl;
 		};
