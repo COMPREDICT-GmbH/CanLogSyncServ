@@ -43,18 +43,18 @@ std::vector<Signal> CanBus::recv(std::chrono::microseconds timeout) const
 			{
 				auto& dbc_sig = signal.second.dbc_signal;
 				auto& dbc_mux_sig = signal.second.dbc_mux_signal;
-				Signal sig;
-				sig.id = signal.second.id;
 				if (dbc_sig->multiplexer_indicator != dbcppp::Signal::Multiplexer::MuxValue ||
 					dbc_mux_sig->raw_to_phys(dbc_mux_sig->decode(data)) ==
 						dbc_sig->multiplexer_switch_value)
 				{
+					Signal sig;
+					sig.id = signal.second.id;
 					sig.value = dbc_sig->raw_to_phys(dbc_sig->decode(data));
 					sig.dbc_signal = signal.second.dbc_signal;
 					sig.timestamp = frame->timestamp;
 					sig.bus_id = _bus_id;
 					sig.user_data = signal.first;
-					result.push_back(sig);
+					result.push_back(std::move(sig));
 				}
 			}
 		}

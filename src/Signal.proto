@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package CanLogSyncServ;
 
+option optimize_for = LITE_RUNTIME;
+
 message Pb_Signal
 {
     uint64 id = 1;
