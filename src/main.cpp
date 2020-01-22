@@ -21,6 +21,13 @@
 #include "CanBus.h"
 #include "ZmqServer.h"
 
+// Increment with big changes in release
+constexpr uint64_t V_MAJOR = 1;
+// Increment with minor changes in release
+constexpr uint64_t V_MINOR = 0;
+// Increment with commit
+constexpr uint64_t V_BUILD = 0;
+
 std::atomic<bool> g_running;
 void term(int signum)
 {
@@ -118,16 +125,17 @@ int main(int argc, char** argv)
 			"under the Protocols section.")
 		("can_bus", po::value<std::vector<std::string>>()->multitoken()->required(), "list of busids, CAN interfaces and DBC files")
 		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds")
-		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals");
+		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals")
+		("version,v", "print version");
 	auto print_usage =
 		[&desc]()
 		{
 			std::cout << "usage: CanLogSyncServ "
 				"--config=<config_file> "
-				"--can_bus=<<busid>;<iface>;<dbc>>... "
+				"--can_bus=<<busid>,<iface>,<dbc>>... "
 				"--ipc_link=<ipc_link>... "
 				"[--sample_rate=<sample_rate>] "
-				"[--signal=<<busid;<canid>;<signal_name>;<signal_id>>...]"
+				"[--signal=<<busid,<canid>,<signal_name>,<signal_id>>...]"
 				<< std::endl;
 			std::cout << desc << std::endl;
 		};
@@ -141,6 +149,11 @@ int main(int argc, char** argv)
 	if (vm.count("help"))
 	{
 		print_usage();
+		return 0;
+	}
+	if (vm.count("version"))
+	{
+		std::cout << "CanLogSyncServ version: v" << V_MAJOR << "." << V_MINOR << "." << V_BUILD << std::endl;
 		return 0;
 	}
 	po::notify(vm);
