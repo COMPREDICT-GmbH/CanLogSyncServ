@@ -196,8 +196,9 @@ while True:
 There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf). To use the `CanLogSyncServ`, your wished language has to be supported by both libraries (ZeroMQ and protobuf).
 ## Build
 ### Dependencies
-  * [Boost program_options](https://www.boost.org/)
   * [Boost filesystem](https://www.boost.org/)
+  * [Boost program_options](https://www.boost.org/)
+  * [boost_system](https://www.boost.org/)
   * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   * zmq:
