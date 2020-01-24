@@ -198,7 +198,7 @@ There are also many other bindings for other languages to ZeroMQ and protobuf. F
 ### Dependencies
   * [Boost filesystem](https://www.boost.org/)
   * [Boost program_options](https://www.boost.org/)
-  * [boost_system](https://www.boost.org/)
+  * [Boost_system](https://www.boost.org/)
   * [dbcppp](https://github.com/xR3b0rn/dbcppp)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   * zmq:
