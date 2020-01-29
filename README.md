@@ -129,6 +129,7 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 > the tool is atomic braodcasting all the actual frames which belong into one `sample_rate` interval.
 > So if you receive something about a IPC socket, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
+> The bahaviour is basically liek a Zero-order holder.
 
 Now we can subscribe to those IPC sockets like this:
 
