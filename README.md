@@ -1,6 +1,6 @@
 # CanLogSyncServ
 `CanLogSyncServ` is a small and lightweight tool for providing an easy accessable interface to DBC CAN signals by an user defined
-signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool is optimized for performance.
+signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool acts like a Zero-order holder and is optimized for performance.
 
 
 The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern in combination with protobuf:
