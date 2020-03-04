@@ -94,6 +94,14 @@ void CanSync::worker()
 	}
 	while (_running)
 	{
+		auto current_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+		if (_next_fire.count() + 200000 < current_time.count())
+		{
+			for (auto& bt : bus_times)
+			{
+				bt.second = std::chrono::microseconds(current_time.count() - 200000);
+			}
+		}
 		{
 			// enter critical section and poll data until no data left
 			unique_lock_t lock{_mx_signal_data_queue};
