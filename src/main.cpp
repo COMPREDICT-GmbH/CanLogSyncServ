@@ -24,7 +24,7 @@
 // Increment with big changes in release
 constexpr uint64_t V_MAJOR = 1;
 // Increment with minor changes in release
-constexpr uint64_t V_MINOR = 0;
+constexpr uint64_t V_MINOR = 1;
 // Increment with commit
 constexpr uint64_t V_BUILD = 0;
 
