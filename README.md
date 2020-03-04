@@ -200,7 +200,7 @@ There are also many other bindings for other languages to ZeroMQ and protobuf. F
   * [Boost filesystem](https://www.boost.org/)
   * [Boost program_options](https://www.boost.org/)
   * [Boost_system](https://www.boost.org/)
-  * [dbcppp](https://github.com/xR3b0rn/dbcppp)
+  * [dbcppp v1.0.0](https://github.com/xR3b0rn/dbcppp)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   * zmq:
   	* [cppzmq](https://github.com/zeromq/cppzmq)
