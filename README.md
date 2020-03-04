@@ -1,6 +1,6 @@
 # CanLogSyncServ
 `CanLogSyncServ` is a small and lightweight tool for providing an easy accessable interface to DBC CAN signals by an user defined
-signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool is optimized for performance.
+signal ID over a IPC protocol based on ZeroMQ and protobuf. For this the tool acts like a Zero-order holder and is optimized for performance.
 
 
 The IPC protocol is using the ZeroMQ Publisher/Subscriber pattern in combination with protobuf:
@@ -129,6 +129,7 @@ The `CanLogSyncServ` is now broadcasting the physical signal values over those t
 > the tool is atomic braodcasting all the actual frames which belong into one `sample_rate` interval.
 > So if you receive something about a IPC socket, you can be sure, that **exactly** `sample_rate` microseconds passed between the last received data.
 > So there is absolutly no synchronizing mechanism needed to be implemented by the user of this tool.
+> The bahaviour is basically liek a Zero-order holder.
 
 Now we can subscribe to those IPC sockets like this:
 
@@ -196,9 +197,10 @@ while True:
 There are also many other bindings for other languages to ZeroMQ and protobuf. For more informations look at the official sites of [ZeroMQ](https://zeromq.org/get-started/) and [protobuf](https://github.com/protocolbuffers/protobuf). To use the `CanLogSyncServ`, your wished language has to be supported by both libraries (ZeroMQ and protobuf).
 ## Build
 ### Dependencies
-  * [Boost program_options](https://www.boost.org/)
   * [Boost filesystem](https://www.boost.org/)
-  * [dbcppp](https://github.com/xR3b0rn/dbcppp)
+  * [Boost program_options](https://www.boost.org/)
+  * [Boost_system](https://www.boost.org/)
+  * [dbcppp v1.0.0](https://github.com/xR3b0rn/dbcppp)
   * [protobuf](https://github.com/protocolbuffers/protobuf)
   * zmq:
   	* [cppzmq](https://github.com/zeromq/cppzmq)
