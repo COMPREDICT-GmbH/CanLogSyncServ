@@ -26,7 +26,7 @@ constexpr uint64_t V_MAJOR = 1;
 // Increment with minor changes in release
 constexpr uint64_t V_MINOR = 1;
 // Increment with commit
-constexpr uint64_t V_BUILD = 0;
+constexpr uint64_t V_BUILD = 1;
 
 std::atomic<bool> g_running;
 void term(int signum)
