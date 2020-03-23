@@ -3,14 +3,14 @@ file(GLOB SRC *.cpp)
 file(GLOB HPP *.h)
 
 exec_program(${PROTOBUF_PROTOC_EXECUTABLE} ARGS
-	--cpp_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--csharp_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--java_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--js_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--objc_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--php_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--python_out ${CMAKE_CURRENT_SOURCE_DIR}
-	--ruby_out ${CMAKE_CURRENT_SOURCE_DIR}
+	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--csharp_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--java_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--js_out=import_style=commonjs,binary:${CMAKE_CURRENT_SOURCE_DIR}
+	--objc_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--php_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--python_out=${CMAKE_CURRENT_SOURCE_DIR}
+	--ruby_out=${CMAKE_CURRENT_SOURCE_DIR}
        	-I${CMAKE_CURRENT_SOURCE_DIR} Signal.proto)
 
 include_directories(${Boost_INCLUDE_DIRS})
