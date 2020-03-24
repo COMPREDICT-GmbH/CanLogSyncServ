@@ -26,5 +26,5 @@ target_link_libraries(CanLogSyncServ CanLogSyncServSignal ${dbcppp_LIBRARY} ${Ze
 install(TARGETS CanLogSyncServ DESTINATION bin)
 install(TARGETS CanLogSyncServSignal DESTINATION lib)
 install(FILES Signal.pb.h DESTINATION include/CanLogSyncServ)
-install(FILES pb_signal.js pb_signals.js CanLogSyncServ/Pb_Signal.php CanLogSyncServ/Pb_Signals.php Signal.cs CanLogSyncServ/Signal.java Signal_pb2.py Signal.pb.cc Signal.pb.h Signal.pbobjc.h Signal.pbobjc.m Signal_pb.rb DESTINATION lib/CanLogSyncServ)
+install(FILES Signal_pb.js CanLogSyncServ/Pb_Signal.php CanLogSyncServ/Pb_Signals.php Signal.cs CanLogSyncServ/Signal.java Signal_pb2.py Signal.pb.cc Signal.pb.h Signal.pbobjc.h Signal.pbobjc.m Signal_pb.rb DESTINATION lib/CanLogSyncServ)
 
