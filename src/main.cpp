@@ -92,7 +92,6 @@ static void insert_msgs_into_canbuses(
 			// if there is no mux_sig, mux_sig will be nullptr
 			sig_wrapper.dbc_mux_signal = mux_sig;
 			map_wrappers[cfg_sig.canid].push_back(sig_wrapper);
-			std::cout << "Added Signal: " << msg->second->name << "::" << sig->second->name << std::endl;
 		}
 		std::vector<std::pair<canid_t, std::vector<DBCSignal_Wrapper>>> msgs;
 		for (const auto& wrappers : map_wrappers)
