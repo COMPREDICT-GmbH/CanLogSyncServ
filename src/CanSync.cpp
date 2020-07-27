@@ -94,14 +94,6 @@ void CanSync::worker()
 	}
 	while (_running)
 	{
-		auto current_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-		if (_next_fire.count() + 200000 < current_time.count())
-		{
-			for (auto& bt : bus_times)
-			{
-				bt.second = std::chrono::microseconds(current_time.count() - 200000);
-			}
-		}
 		{
 			// enter critical section and poll data until no data left
 			unique_lock_t lock{_mx_signal_data_queue};
@@ -126,6 +118,19 @@ void CanSync::worker()
 					bus_times[signal_data.bus_id] = signal_data.timestamp;
 					_signal_data_queue.pop();
 				}
+			}
+		}
+		for (auto& bt : bus_times)
+		{
+			if (200000 < std::abs(int64_t(bt.second.count()) - int64_t(_next_fire.count())))
+			{
+				std::cout << "CanLogSyncServ: Timejump detected! Now I will correct the timejump!" << std::endl;
+				_next_fire = bt.second;
+				for (auto& bt2 : bus_times)
+				{
+					bt2.second = bt.second;
+				}
+				break;
 			}
 		}
 		auto pull_data_to_current =
@@ -164,6 +169,7 @@ void CanSync::worker()
 		{
 			pull_data_to_current();
 			std::vector<SubData> sub_data;
+			sub_data.reserve(_signal_queues.size());
 			for (auto& signal_fire_data : _signal_queues)
 			{
 				sub_data.push_back(signal_fire_data.current);
