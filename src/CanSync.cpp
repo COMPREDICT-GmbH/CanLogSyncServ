@@ -99,8 +99,16 @@ void CanSync::worker()
 			unique_lock_t lock{_mx_signal_data_queue};
 			bool new_data = _cond_var_frame_recv.wait_for(
 				lock, std::chrono::milliseconds{100},
-				[this]()
+				[this, &bus_times]()
 				{
+					auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+					for (const auto& bt : bus_times)
+					{
+						if (bt.second + std::chrono::seconds(5) < now)
+						{
+							throw std::runtime_error("CanSync: Bus timeout! Did not receive a CAN frame for 5 secs!");
+						}
+					}
 					return _signal_data_queue.size() > 0;
 				});
 			if (new_data)
