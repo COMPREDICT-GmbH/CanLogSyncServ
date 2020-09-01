@@ -125,6 +125,7 @@ int main(int argc, char** argv)
 		("can_bus", po::value<std::vector<std::string>>()->multitoken()->required(), "list of busids, CAN interfaces and DBC files")
 		("sample_rate", po::value<uint64_t>()->default_value(5000), "sample rate in microseconds")
 		("signal", po::value<std::vector<std::string>>()->multitoken(), "list of signals")
+		("can_timeout", po::value<uint64_t>()->default_value(200), "after can_timeout milliseconds without any frame received, the CanLogSyncServ will terminate")
 		("version,v", "print version");
 	auto print_usage =
 		[&desc]()
@@ -161,6 +162,7 @@ int main(int argc, char** argv)
 	const auto cmd_can_buses    = vm["can_bus"].as<std::vector<std::string>>();
 	const auto sample_rate      = vm["sample_rate"].as<uint64_t>();
 	const auto cmd_signals      = vm["signal"];
+        const auto can_timeout      = vm["can_timeout"].as<uint64_t>();
     
 	std::vector<CanBus> can_buses;
 	{
@@ -205,7 +207,7 @@ int main(int argc, char** argv)
 		ZmqServer& _zmq_server;
 	};
 	ZmqServer zmq_server{ipc_links};
-	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses)};
+	CanSync can_sync{std::chrono::microseconds{sample_rate}, std::move(can_buses), std::chrono::milliseconds{can_timeout}};
 	{
 		// for some reason I don't understand if the unique_ptr is passed directly to
 		// the subscribe funciton, the next ::recvmsg call in Can will return 0 what will

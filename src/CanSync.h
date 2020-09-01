@@ -33,7 +33,7 @@ public:
 
 	using unique_lock_t = std::unique_lock<std::mutex>;
 
-	CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses);
+	CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses, std::chrono::milliseconds can_timeout);
 	~CanSync();
 	bool running() const;
 	void start();
@@ -64,4 +64,5 @@ private:
 		std::queue<Signal> signal_queue;
 	};
 	std::vector<SignalFireData> _signal_queues;
+	std::chrono::milliseconds _can_timeout;
 };

@@ -3,10 +3,11 @@
 #include <assert.h>
 #include "CanSync.h"
 
-CanSync::CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses)
+CanSync::CanSync(std::chrono::microseconds sample_rate, std::vector<CanBus>&& can_buses, std::chrono::milliseconds can_timeout)
 	: _sample_rate{sample_rate}
 	, _running{false}
 	, _can_buses{std::move(can_buses)}
+	, _can_timeout{can_timeout}
 {
 }
 CanSync::~CanSync()
@@ -104,7 +105,7 @@ void CanSync::worker()
 					auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
 					for (const auto& bt : bus_times)
 					{
-						if (bt.second + std::chrono::seconds(5) < now)
+						if (bt.second + _can_timeout < now)
 						{
 							throw std::runtime_error("CanSync: Bus timeout! Did not receive a CAN frame for 5 secs!");
 						}
