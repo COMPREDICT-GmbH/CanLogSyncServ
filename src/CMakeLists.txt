@@ -3,15 +3,10 @@ file(GLOB SRC *.cpp)
 file(GLOB HPP *.h)
 
 exec_program(${PROTOBUF_PROTOC_EXECUTABLE} ARGS
-	--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--csharp_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--java_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--js_out=import_style=commonjs,binary:${CMAKE_CURRENT_SOURCE_DIR}
-	--objc_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--php_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--python_out=${CMAKE_CURRENT_SOURCE_DIR}
-	--ruby_out=${CMAKE_CURRENT_SOURCE_DIR}
-       	-I${CMAKE_CURRENT_SOURCE_DIR} Signal.proto)
+    --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}
+    --js_out=import_style=commonjs,binary:${CMAKE_CURRENT_SOURCE_DIR}
+    --python_out=${CMAKE_CURRENT_SOURCE_DIR}/protobuf_generated/python/PbSignal
+    -I${CMAKE_CURRENT_SOURCE_DIR} Signal.proto)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${ZeroMQ_INCLUDE_DIR})
@@ -25,6 +20,6 @@ target_link_libraries(CanLogSyncServ CanLogSyncServSignal ${dbcppp_LIBRARY} ${Ze
 
 install(TARGETS CanLogSyncServ DESTINATION bin)
 install(TARGETS CanLogSyncServSignal DESTINATION lib)
-install(FILES Signal.pb.h DESTINATION include/CanLogSyncServ)
-install(FILES Signal_pb.js CanLogSyncServ/Pb_Signal.php CanLogSyncServ/Pb_Signals.php Signal.cs CanLogSyncServ/Signal.java Signal_pb2.py Signal.pb.cc Signal.pb.h Signal.pbobjc.h Signal.pbobjc.m Signal_pb.rb DESTINATION lib/CanLogSyncServ)
+install(FILES Signal_pb.js Signal.pb.h DESTINATION include/CanLogSyncServ)
+install(CODE "execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/protobuf_generated/python COMMAND python3 setup.py install)")
 
