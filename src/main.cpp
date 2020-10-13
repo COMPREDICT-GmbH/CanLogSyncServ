@@ -105,7 +105,7 @@ static void insert_msgs_into_canbuses(
 		}
 		Can can{cfg_can_bus.iface};
 		can.set_filters(filter_ids);
-		can_buses.emplace_back(0, std::move(can), std::move(msgs));
+		can_buses.emplace_back(cfg_can_bus.busid, std::move(can), std::move(msgs));
 	}
 }
 
