@@ -35,7 +35,7 @@ void CanSync::start()
 			{
 				SignalFireData signal_fire_data;
 				signal_fire_data.current.id = cs_id.second;
-				signal_fire_data.current.value = 0.;
+				signal_fire_data.current.value = 1'000'000'000.;
 				_signal_queues.push_back(signal_fire_data);
 				void* user_data = reinterpret_cast<void*>(&_signal_queues.back());
 				can_bus.set_user_data(cs_id.first, cs_id.second, user_data);
